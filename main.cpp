@@ -30,7 +30,7 @@ vector<int> getclause() {
   std::string line;
   std::getline(cin, line);
   std::istringstream iss(line);
-  while ( iss >> c) {    
+  while (iss >> c) {    
     cout<<c<<" ";
   }
   return cl;
