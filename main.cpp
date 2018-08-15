@@ -17,21 +17,37 @@ int main(int argc, char const *argv[])
     return 0;
 }
 
-void createhd(string name, int bsize, int blocks){
-    FILE * file;
-    file = fopen("teste.txt", "a");
-    if (file != NULL)
-        cout<<"Arquivo aberto!\n";
+//Create a file with a "name" in which will be the virtual HD
+void createhd(char *name, int blocks, int bsize)
+{
+    FILE *pHd;
+    pHd = fopen(name, "a");
+    if (pHd != NULL) {perror("Error opening file!\n");}
+    else
+    {
+        for (int i = 0; i < blocks; i++)
+        {
+            for (int j = 0; j < bsize; j++)
+            {
+                fputc('/', pHd);
+                if (ferror(pHd)) { perror("Error writing in to the file\n"); }
+            }
+            fputc('\n', pHd);
+        }
+        fclose(pHd);
+    }
 }
 
-vector<int> getclause() {
-  char c;
-  vector<int> cl;
-  std::string line;
-  std::getline(cin, line);
-  std::istringstream iss(line);
-  while (iss >> c) {    
-    cout<<c<<" ";
-  }
-  return cl;
+vector<int> getclause()
+{
+    char c;
+    vector<int> cl;
+    string line;
+    getline(cin, line);
+    istringstream iss(line);
+    while (iss >> c)
+    {
+        cout << c << " ";
+    }
+    return cl;
 }
