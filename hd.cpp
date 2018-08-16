@@ -1,8 +1,6 @@
 /*
 This file is related to the functions and attributes of the virtual HD
 */
-
-
 #include <iostream>
 #include <string>
 #include <stdio.h>
@@ -12,8 +10,13 @@ This file is related to the functions and attributes of the virtual HD
 
 using namespace std;
 
+FILE * createhd(char const *name, int nBlocks, int sBlock);
+void writeHeader(FILE * hd, int sBlock, int nBlocks);
+void writeToBlock(int blockNo, string content, FILE * hd, int sBlock);
+
+
 //Create a file with a "name" in which will be the virtual HD
-FILE * createhd(char const *name, int sblocks, int bsize)
+FILE * createhd(char const *name, int nBlocks, int sBlock)
 {
     FILE *pHd;
     pHd = fopen(name, "w+");
@@ -23,10 +26,10 @@ FILE * createhd(char const *name, int sblocks, int bsize)
     }
     else
     {
-        writeHeader(pHd, sblocks, (bsize/(sblocks * 8)));
-        for (int block = 0; block < sblocks; block++)
+        writeHeader(pHd, sBlock, (nBlocks/(sBlock * 8)));
+        for (int block = 0; block < nBlocks; block++)
         {
-            for (int byte = 0; byte < bsize; byte++)
+            for (int byte = 0; byte < sBlock; byte++)
             {
                 fputc('#', pHd);
                 if (ferror(pHd)) { perror("Error writing in to the file\n"); }
@@ -37,10 +40,10 @@ FILE * createhd(char const *name, int sblocks, int bsize)
     }
 }
 
-void writeHeader(FILE * hd, int sizeBloco, int qtdeBlocos){
+void writeHeader(FILE * hd, int sBlock, int nBlocks){
 	fputc('$', hd);
-	for(int bloco = 0; bloco < qtdeBlocos; bloco++){
-		for(int size = 0; size < sizeBloco; size++){
+	for(int bloco = 0; bloco < nBlocks; bloco++){
+		for(int size = 0; size < sBlock; size++){
 			fputc('0', hd);
 		}
 		//fputc('\n', hd);		
@@ -49,9 +52,9 @@ void writeHeader(FILE * hd, int sizeBloco, int qtdeBlocos){
 }
 
 
-void writeToBlock(int blockNo, string content, FILE * hd, int sizeBloco){
-	if(content.length() < sizeBloco){
-		fseek(hd, blockNo * sizeBloco, SEEK_SET);
+void writeToBlock(int blockNo, string content, FILE * hd, int sBlock){
+	if(content.length() < sBlock){
+		fseek(hd, blockNo * sBlock, SEEK_SET);
 		fputs(content.c_str(), hd);
 	}else{
 		cout<<"Too big";
