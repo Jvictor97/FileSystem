@@ -9,6 +9,7 @@
 
 using namespace std;
 
+typedef void (*FnPtr)(void);
 
 int main() {
   	//bitset<8> mb = bitset<8>(16);
