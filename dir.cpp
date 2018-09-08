@@ -13,12 +13,12 @@ using namespace std;
 
 void createdir(){
 	string folder_name;
-	cin>>folder_name;
-	#ifdef __linux__
-	const int dir_err = mkdir(folder_name.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-	if (dir_err == -1) {
-		perror("Erro");
-		exit(1);
+	if(cin>>createdir>>folder_name){
+		const int dir_err = mkdir(folder_name.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+		if (dir_err == -1) {
+			perror("Erro");
+			exit(1);
+		}	
 	}
 
 	
@@ -39,12 +39,11 @@ void createdir(){
 		}
 
 	#else
-	#error Plataforma não suportada
+	#error Plataforma nï¿½o suportada
 	#endif
 
 }
 
-int main(){
-	createdir();
-	return 0;
-}
+#else
+#error Plataforma nï¿½o suportada
+#endif
