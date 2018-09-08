@@ -4,8 +4,7 @@
 
 using namespace std;
 
-void printHelp(string command){
-	if(command == "help" || command == "?"){
+void printHelp(){
 		cout<<" Comandos e Funcionalidades\n\n\n"<<endl;
 		
 		cout<<"ARQUIVO - create [arquivo] \nCriar struct do I-Node de arquivo.\n"<<endl;
@@ -55,14 +54,11 @@ void printHelp(string command){
 		cout<<"help ou ?\n Ajuda\n"<<endl;
 	 
 	 	cout<<"exit\nSair\n\n\n\n"<<endl;
-	}
   
 }
 
 
 
 int main() {
-	string command;
-	cin>>command;
-	printHelp(command);
+	printHelp();
 }
