@@ -12,30 +12,34 @@
 
 #ifdef __linux__
 using namespace std;
-void createFolderLinux(){
-	string createdir = "createdir";
+void createFolderLinux(string command){
 	string folder_name;
-	if(cin>>createdir>>folder_name){
+	if(command == "createdir"){
+		cin>>folder_name;
 		const int dir_err = mkdir(folder_name.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-    if (dir_err == -1) {
-        perror("Erro");
-        exit(1);
-    }	
+		if (dir_err == -1) {
+		    perror("Erro");
+		    exit(1);
+	    }	
 	}
+	
 }
 
 int main(int argc, char *argv[]){
-	createFolderLinux();	
+	string command;
+	cin>>command;
+	createFolderLinux(command);	
 	return 0;
 }
 
 #elif defined WIN32
 #include <direct.h> 
 using namespace std;
-void createFolderWindows(){
+void createFolderWindows(string command){
 	string folder_name;
 	string createdir = "createdir";
-	if(cin>>createdir>>folder_name){
+	if(command == "createdir"){
+		cin>>folder_name;
 		if(mkdir(folder_name.c_str()) != 0){
 			perror("Erro");
 		}
@@ -46,17 +50,19 @@ void createFolderWindows(){
 }
 
 int main() {
-   createFolderWindows();
+	string command;
+	cin>>command;
+	createFolderWindows(command);
    return 0;
 }
 
 #elif defined WIN64
 using namespace std;
-void createFolderWindows(){
+void createFolderWindows(string command){
 	string folder_name;
-	string createdir = "createdir";
 	string str;
-	if(cin>>createdir>>folder_name){
+	if(command == "createdir"){
+		cin>>folder_name;
 		if(mkdir(folder_name.c_str()) != 0){
 			perror("Erro");
 		}
@@ -67,7 +73,9 @@ void createFolderWindows(){
 }
 
 int main() {
-   createFolderWindows();
+	string command;
+	cin>>command;
+	createFolderWindows(command);
    return 0;
 }
 
