@@ -16,8 +16,8 @@ int main() {
 	funcs["createhd"] = createhd;
 	funcs["exit"] = exit;
 
-	cout<<"\n* Seja bem vindo ao MVPFS *\n";
-	cout<<"Digite a funcao que deseja executar:\n\n";
+	cout<<"\n* Seja bem vindo ao MVPFS *";
+	cout<<"\nDigite a funcao que deseja executar:\n\n";
 
 	while(cmd != "exit"){
 		printf(">");
