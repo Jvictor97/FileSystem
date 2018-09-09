@@ -42,23 +42,3 @@ int main() {
 
 	return 0;
 }
-
-void getclause(){
-	string in;
-	int i = 0;
-	std::string line;
-	std::getline(cin, line);
-	std::istringstream iss(line);
-
-	bool first = true;
-
-	while (iss >> in){
-		if(first){
-			cmd = in;
-			first = false;
-		}else{
-			params[i] = in;
-			i++;
-		}
-	}
-}
