@@ -1,3 +1,7 @@
+#include <iostream>
+
+using namespace std;
+
 class SuperBlock{
 
 public:
@@ -33,6 +37,16 @@ public:
 
 //     fwrite(mySB.magicNumber, sizeof(SuperBlock::magicNumber), 1, file);
 //     fwrite(mySB.hdName, sizeof(SuperBlock::hdName), 1, file);
+
+    // strncpy(mySB.magicNumber, "bXZwZnM=", sizeof(SuperBlock::magicNumber));
+    // mySB.blockSize = 256;
+    // mySB.nBlocks = 1024;
+    // mySB.nFreeBlocks = 1023;
+    // mySB.firstInode = 2;
+    // mySB.firstDataBlock = 30;  
+    // strncpy(mySB.hdName, "meuHD", sizeof(SuperBlock::hdName));
+    // fwrite(mySB.magicNumber, sizeof(SuperBlock::magicNumber), 1, file);
+    // fwrite(mySB.hdName, sizeof(SuperBlock::hdName), 1, file);
 
 //     fclose(file);
 

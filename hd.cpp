@@ -13,6 +13,7 @@ This file is related to the functions and attributes of the virtual HD
 #include "inode.cpp"
 #include "superblock.cpp"
 #include "config.cpp"
+#include "bitmapDataBlocks.cpp"
 
 using namespace std;
 
@@ -94,7 +95,7 @@ void createhd()
     {
         writeSuperBlock();
         writeInodeBlocks();
-        //writeBitmapBlocks();
+        writeBitmapBlocks();
         // for (int block = 0; block < (numBlocks - 1 - inodeBlocks - bitmapBlocks); block++)
         // {
         //     for (int byte = 0; byte < sizeBlock; byte++)
@@ -255,15 +256,19 @@ void printSuperBlock(SuperBlock sp){
 }
 
 void writeBitmapBlocks(){
-
+    
+    BitMapDataBlock bitMapDB(numDataBlocks);
+    fwrite(bitMapDB.bitMapArray, bitMapDB.nBlocks, 1, hd);
 }
 
 void updateHD(){
     hd = fopen(nomeHD.c_str(), "w+");
+    
+
     fwrite(&(superBlock), sizeof(SuperBlock), 1, hd);
     fwrite(inodes, sizeof(Inode), inodeBlocks, hd);
-    
     // TODO: escrever bitmapblocks
+
     for(int i = 0; i < numDataBlocks; i++){
         fputs(datablocks[i], hd);
     }
