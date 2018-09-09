@@ -9,6 +9,11 @@ This file is related to the functions and attributes of the virtual HD
 #include <vector>
 #include <cmath>
 
+// Classes para manipulação do HD
+#include "inode.cpp"
+#include "superblock.cpp"
+#include "config.cpp"
+
 using namespace std;
 
 string params[10];
@@ -17,22 +22,34 @@ int numBlocks;
 int sizeBlock;
 int inodeBlocks;
 int bitmapBlocks;
+int numDataBlocks;
 string numBlocks_s;
 string sizeBlock_s;
 string nomeHD;
 FILE * config; // Ponteiro para o arquivo de configuração de HDs
 FILE * hd;    // Ponteiro para o HD que será criado
-string content;
-int blockNo;
+SuperBlock superBlock;
+Inode genericInode;
+Inode * inodes;
+char ** datablocks;
 
 typedef void (*functions)(void); // function pointer type
 
+// Funções principais:
 void createhd();
+void exit();
+void selecionaHD();
+void dirhd();
+
+// Auxiliares:
 int strToInt(const string);
 void writeSuperBlock();
-void writeFixedBytesString(int, string);
-void writeFixedBytesInt(int, string);
-void exit();
+void writeInodeBlocks();
+void writeBitmapBlocks();
+void printInodes(Inode);
+void printSuperBlock(SuperBlock);
+void updateHD();
+void exitHD();
 
 // Cria um arquivo com o nome 'nomeHD', o número de blocos 
 // 'numBlocks' e cada bloco com tamanho 'sizeBlock'
@@ -75,11 +92,13 @@ void createhd()
     else
     {
         writeSuperBlock();
-        for (int block = 0; block < numBlocks - 1; block++)
+        writeInodeBlocks();
+        writeBitmapBlocks();
+        for (int block = 0; block < (numBlocks - 1 - inodeBlocks - bitmapBlocks); block++)
         {
             for (int byte = 0; byte < sizeBlock; byte++)
             {
-                fputc('0', hd);
+                fputc(0, hd);
                 if (ferror(hd)) 
                     perror("Erro na escrita do arquivo");
             }
@@ -102,6 +121,45 @@ void createhd()
     }
 }
 
+void selecionaHD(){
+    string print;
+	map<std::string, functions> localMap;
+	localMap["exit"] = exitHD;
+
+    string fullHdName = nomeHD + ".mvpfs";
+
+    hd = fopen(fullHdName.c_str(), "r+");
+
+	if(hd == NULL){
+		cout<<"ERRO: Nenhum HD encontrado com este nome...\n";
+		return;
+	}
+
+    fread(&superBlock, sizeof(SuperBlock), 1, hd);
+
+    numBlocks = superBlock.numBlocks;
+    sizeBlock = superBlock.blockSize;
+    inodeBlocks = superBlock.firstDataBlock - 1;
+    
+    for(bitmapBlocks = 1; numBlocks - (1 + inodeBlocks + bitmapBlocks) > sizeBlock * 8 * bitmapBlocks; bitmapBlocks++);
+
+    // TODO: Fazer a leitura dos blocos de bitmap do arquivo
+    inodes = (Inode *) malloc(sizeof(Inode) * inodeBlocks);
+    fread(inodes, sizeof(Inode), inodeBlocks, hd);
+
+    numDataBlocks = numBlocks - 1 - inodeBlocks - bitmapBlocks;
+
+    datablocks = (char**) malloc(sizeof(char*) * numDataBlocks);
+
+    for(int i = 0; i < numDataBlocks; i++){
+        datablocks[i] = (char*) malloc(sizeof(char) * sizeBlock);
+    }
+
+    fread(datablocks, sizeof(sizeBlock), numDataBlocks, hd);
+
+    fclose(hd);
+}
+
 void exit(){
 	if(hd != NULL)
 		fclose(hd);
@@ -109,19 +167,59 @@ void exit(){
 }
 
 void writeSuperBlock(){
-    fputs("bXZwZnM=", hd);              // Magic Number
-    writeFixedBytesString(32, nomeHD.substr(0, nomeHD.find(".mvpfs")));  // Nome do HD
-    writeFixedBytesInt(4, sizeBlock_s); // Tamanho de cada bloco
-    writeFixedBytesInt(4, numBlocks_s); // Número de blocos
-    writeFixedBytesInt(4, numBlocks_s); // Número de blocos livres
-    writeFixedBytesInt(4, "1");
+
+    strncpy(superBlock.magicNumber, "bXZwZnM", sizeof(SuperBlock::magicNumber));
+    strncpy(superBlock.hdName, nomeHD.c_str(), sizeof(SuperBlock::hdName));
+    superBlock.blockSize = sizeBlock;
+    superBlock.numBlocks = numBlocks;
+    superBlock.numFreeBlocks = numBlocks - 1;
+    superBlock.firstInodeBlock = 1;
 
     inodeBlocks = 0.03 * numBlocks;
-    string inodeIndex = to_string(1 + inodeBlocks);
     
-    writeFixedBytesInt(4, inodeIndex);
-    
+    superBlock.numInodeBlocks = inodeBlocks;
+
     for(bitmapBlocks = 1; numBlocks - (1 + inodeBlocks + bitmapBlocks) > sizeBlock * 8 * bitmapBlocks; bitmapBlocks++);
+    
+    superBlock.firstDataBlock = inodeBlocks + bitmapBlocks + 1;
+
+    fwrite(&(superBlock), sizeof(SuperBlock), 1, hd);
+
+    // SuperBlock sp;
+    // fseek(hd, 0, SEEK_SET);
+
+    // fread(&sp, sizeof(SuperBlock), 1, hd);
+    // printSuperBlock(sp);
+}
+
+void writeInodeBlocks(){
+    Inode root;
+
+    root.flag = true;
+    root.type = 0;
+    root.number = 0;
+    root.father_inode = 0;
+    strncpy(root.name, "/", 24);
+
+    fwrite(&root, sizeof(Inode), 1, hd);
+
+    genericInode.flag = false;
+    genericInode.type = 2;
+    genericInode.father_inode = -1;
+
+    for(int i = 1; i < inodeBlocks; i++){
+        genericInode.number = i;
+        fwrite(&genericInode, sizeof(Inode), 1, hd);
+    }
+
+    inodes = (Inode *) malloc(sizeof(Inode) * inodeBlocks);
+    fseek(hd, sizeof(SuperBlock), SEEK_SET);
+
+    fread(inodes, sizeof(Inode), inodeBlocks, hd);
+
+    for(int i = 0; i < inodeBlocks; i++){
+        printInodes(inodes[i]);
+    }   
 }
 
 int strToInt(const string str){
@@ -136,20 +234,55 @@ int strToInt(const string str){
     return i;
 }
 
-void writeFixedBytesString(int bytes, string str){
-    int numZeros = bytes - strlen(str.c_str());
-    fputs(str.c_str(), hd);
+void printInodes(Inode i){
+    printf("Flag: %d\n", i.flag);
+    printf("Type: %d\n", i.type);
+    printf("Number: %d\n", i.number);
+    printf("Father: %d\n", i.father_inode);
+    printf("Name: %s\n", i.name);
 
-    for(int i = 0; i < numZeros; i++){
-        fputc('0', hd);
+    for(int j = 0; j < 7; j++){
+        printf("Block[%d]: %d\n", j, i.blocks[j]);
     }
+    cout<<endl;
+}
+
+void printSuperBlock(SuperBlock sp){
+    printf("%s\n", sp.magicNumber);
+    printf("%s\n", sp.hdName);
+    printf("%d\n", sp.blockSize);
+    printf("%d\n", sp.numBlocks);
+    printf("%d\n", sp.numFreeBlocks);
+    printf("%d\n", sp.firstInodeBlock);
+    printf("%d\n", sp.firstDataBlock);
+}
+
+void writeBitmapBlocks(){
 
 }
 
-void writeFixedBytesInt(int bytes, string str){
-    int numZeros = bytes - strlen(str.c_str());
-    for(int i = 0; i < numZeros; i++){
-        fputc('0', hd);
+void updateHD(){
+    hd = fopen(nomeHD.c_str(), "w+");
+    fwrite(&(superBlock), sizeof(SuperBlock), 1, hd);
+    fwrite(inodes, sizeof(Inode), inodeBlocks, hd);
+    
+    // TODO: escrever bitmapblocks
+    for(int i = 0; i < numDataBlocks; i++){
+        fputs(datablocks[i], hd);
     }
-    fputs(str.c_str(), hd);
+    fclose(hd);
+}
+
+void exitHD(){
+    updateHD();
+
+    free(inodes);
+
+    for(int i = 0; i < numDataBlocks; i++){
+        free(datablocks[i]);
+    }
+
+    free(datablocks);
+
+    cout<<"\nHD "<<nomeHD<<"salvo com sucesso!"<<endl;
 }

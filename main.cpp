@@ -6,6 +6,7 @@
 #include <vector>
 #include <bitset>
 #include "hd.cpp"
+#include "help.cpp"
 
 using namespace std;
 
@@ -15,6 +16,8 @@ int main() {
 	map<std::string, functions> funcs;
 	funcs["createhd"] = createhd;
 	funcs["exit"] = exit;
+	funcs["help"] = help;
+	funcs["?"] = help;
 
 	cout<<"\n* Seja bem vindo ao MVPFS *";
 	cout<<"\nDigite a funcao que deseja executar:\n\n";
@@ -26,8 +29,8 @@ int main() {
 		if(cmd.back() == ':'){
 			cmd.back() = '.';
 			cmd += "mvpfs";
-			//nomeHD = cmd;
-			//selecionaHD();
+			nomeHD = cmd;
+			selecionaHD();
 		}
 		else
 			if(funcs.find(cmd.c_str()) == funcs.end())

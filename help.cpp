@@ -4,7 +4,7 @@
 
 using namespace std;
 
-void printHelp(){
+void help(){
 		cout<<" Comandos e Funcionalidades\n\n\n"<<endl;
 		
 		cout<<"ARQUIVO - create [arquivo] \nCriar struct do I-Node de arquivo.\n"<<endl;
@@ -33,7 +33,7 @@ void printHelp(){
 
     	cout<<"HD - removehd [nome do hd]\nExclui um HD do sistema\n"<<endl;
 
-    	cout<<"HD - statushd [nome do hd]\nExibe propriedades do filesystem como espaço utilizado e disponivel\n"<<endl;
+    	cout<<"HD - statushd [nome do hd]\nExibe propriedades do filesystem como espaï¿½o utilizado e disponivel\n"<<endl;
    
     	cout<<"HD - typehd [nome do hd]\nColeta informacoes dos blocos de dados validos no HD e exibe na tela o conteudo em codificacao char e byte\n"<<endl;
 
@@ -55,10 +55,4 @@ void printHelp(){
 	 
 	 	cout<<"exit\nSair\n\n\n\n"<<endl;
   
-}
-
-
-
-int main() {
-	printHelp();
 }
