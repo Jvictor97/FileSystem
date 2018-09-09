@@ -26,12 +26,13 @@ int numDataBlocks;
 string numBlocks_s;
 string sizeBlock_s;
 string nomeHD;
-FILE * config; // Ponteiro para o arquivo de configuração de HDs
+FILE * configFile; // Ponteiro para o arquivo de configuração de HDs
 FILE * hd;    // Ponteiro para o HD que será criado
 SuperBlock superBlock;
 Inode genericInode;
 Inode * inodes;
 char ** datablocks;
+Config config;
 
 typedef void (*functions)(void); // function pointer type
 
@@ -93,29 +94,28 @@ void createhd()
     {
         writeSuperBlock();
         writeInodeBlocks();
-        writeBitmapBlocks();
-        for (int block = 0; block < (numBlocks - 1 - inodeBlocks - bitmapBlocks); block++)
-        {
-            for (int byte = 0; byte < sizeBlock; byte++)
-            {
-                fputc(0, hd);
-                if (ferror(hd)) 
-                    perror("Erro na escrita do arquivo");
-            }
-        }
+        //writeBitmapBlocks();
+        // for (int block = 0; block < (numBlocks - 1 - inodeBlocks - bitmapBlocks); block++)
+        // {
+        //     for (int byte = 0; byte < sizeBlock; byte++)
+        //     {
+        //         fputc(0, hd);
+        //         if (ferror(hd)) 
+        //             perror("Erro na escrita do arquivo");
+        //     }
+        // }
         fclose(hd); 
 
-        config = fopen(".config", "a"); // Abre ou cria o arquivo config
+        string shortHdName = nomeHD.substr(0, nomeHD.find(".mvpfs"));
 
-        nomeHD = nomeHD.substr(0, nomeHD.find(".mvpfs"));
-        fputs(nomeHD.c_str(), config);
-        fputc('|', config);
-        fputs(sizeBlock_s.c_str(), config);
-        fputc('|', config);
-        fputs(numBlocks_s.c_str(), config);
-        fputc(';', config);
-        nomeHD+=".mvpfs";
-        fclose(config);
+        strncpy(config.nomeHD, shortHdName.c_str(), sizeof(Config::nomeHD));
+        config.blockSize = sizeBlock;
+        config.numBlocks = numBlocks;
+        
+        configFile = fopen(".config", "a"); // Abre ou cria o arquivo config
+
+        fwrite(&config, sizeof(Config), 1, configFile);
+        fclose(configFile);
 
         return;
     }
@@ -126,9 +126,7 @@ void selecionaHD(){
 	map<std::string, functions> localMap;
 	localMap["exit"] = exitHD;
 
-    string fullHdName = nomeHD + ".mvpfs";
-
-    hd = fopen(fullHdName.c_str(), "r+");
+    hd = fopen(nomeHD.c_str(), "r+");
 
 	if(hd == NULL){
 		cout<<"ERRO: Nenhum HD encontrado com este nome...\n";
@@ -141,7 +139,7 @@ void selecionaHD(){
     sizeBlock = superBlock.blockSize;
     inodeBlocks = superBlock.firstDataBlock - 1;
     
-    for(bitmapBlocks = 1; numBlocks - (1 + inodeBlocks + bitmapBlocks) > sizeBlock * 8 * bitmapBlocks; bitmapBlocks++);
+    for(bitmapBlocks = 1; numBlocks - (1 + inodeBlocks + bitmapBlocks) > sizeBlock * bitmapBlocks; bitmapBlocks++);
 
     // TODO: Fazer a leitura dos blocos de bitmap do arquivo
     inodes = (Inode *) malloc(sizeof(Inode) * inodeBlocks);
@@ -179,7 +177,7 @@ void writeSuperBlock(){
     
     superBlock.numInodeBlocks = inodeBlocks;
 
-    for(bitmapBlocks = 1; numBlocks - (1 + inodeBlocks + bitmapBlocks) > sizeBlock * 8 * bitmapBlocks; bitmapBlocks++);
+    for(bitmapBlocks = 1; numBlocks - (1 + inodeBlocks + bitmapBlocks) > sizeBlock * bitmapBlocks; bitmapBlocks++);
     
     superBlock.firstDataBlock = inodeBlocks + bitmapBlocks + 1;
 
@@ -199,7 +197,7 @@ void writeInodeBlocks(){
     root.type = 0;
     root.number = 0;
     root.father_inode = 0;
-    strncpy(root.name, "/", 24);
+    strncpy(root.name, "/", sizeof(Inode::name));
 
     fwrite(&root, sizeof(Inode), 1, hd);
 
@@ -215,9 +213,8 @@ void writeInodeBlocks(){
     inodes = (Inode *) malloc(sizeof(Inode) * inodeBlocks);
     fseek(hd, sizeof(SuperBlock), SEEK_SET);
 
-    fread(inodes, sizeof(Inode), inodeBlocks, hd);
-
     for(int i = 0; i < inodeBlocks; i++){
+        fread(&inodes[i], sizeof(Inode), 1, hd);
         printInodes(inodes[i]);
     }   
 }
