@@ -52,6 +52,7 @@ void printInodes(Inode);
 void printSuperBlock(SuperBlock);
 void updateHD();
 void exitHD();
+void getclause();
 
 // Cria um arquivo com o nome 'nomeHD', o número de blocos 
 // 'numBlocks' e cada bloco com tamanho 'sizeBlock'
@@ -157,6 +158,18 @@ void selecionaHD(){
     fread(datablocks, sizeof(sizeBlock), numDataBlocks, hd);
 
     fclose(hd);
+
+    string simpleHdName = nomeHD.substr(0, nomeHD.find(".mvpfs"));
+
+    while(cmd != "exit"){
+		cout<<simpleHdName<<"# ";
+		getclause();
+
+        if(localMap.find(cmd.c_str()) == localMap.end())
+            cout<<"ERRO: Esta funcao nao existe...\n";
+        else
+            localMap[cmd]();
+	}
 }
 
 void exit(){
@@ -286,5 +299,25 @@ void exitHD(){
 
     free(datablocks);
 
-    cout<<"\nHD "<<nomeHD<<"salvo com sucesso!"<<endl;
+    cout<<"\nO HD "<<nomeHD<<" foi salvo com sucesso!"<<endl;
+}
+
+void getclause(){
+	string in;
+	int i = 0;
+	std::string line;
+	std::getline(cin, line);
+	std::istringstream iss(line);
+
+	bool first = true;
+
+	while (iss >> in){
+		if(first){
+			cmd = in;
+			first = false;
+		}else{
+			params[i] = in;
+			i++;
+		}
+	}
 }
