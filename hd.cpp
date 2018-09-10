@@ -318,9 +318,22 @@ void writeBitmapBlocks(){
 void updateHD(){
     hd = fopen(nomeHD.c_str(), "w+");
     
-
     fwrite(&(superBlock), sizeof(SuperBlock), 1, hd);
-    fwrite(inodes, sizeof(Inode), inodeBlocks, hd);
+
+    int space = sizeBlock;
+
+    for(int i = 0; i < inodeBlocks; i++){
+        if(sizeof(Inode) > space){
+            for(int j = 0; j < space; j++){
+                fputc(0, hd);
+            }
+            space = sizeBlock;
+        }
+        fwrite(&inodes[i], sizeof(Inode), 1, hd);
+        space -= sizeof(Inode);
+    }
+
+    //fwrite(inodes, sizeof(Inode), inodeBlocks, hd);
     fwrite(bitmapDataBlocks.bitMapArray, bitmapDataBlocks.numBlocks, 1, hd);
 
     for(int i = 0; i < numDataBlocks; i++){
