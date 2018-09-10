@@ -3,17 +3,17 @@
 using namespace std;
 
 // Classe para criação do bitmap de Datablocks
-class BitMapDataBlock{
+class BitMapDataBlocks{
 
     
     public:
-    //Construtor da classe de BitMap
-    BitMapDataBlock(int Blocks){
-        nBlocks = Blocks;
-        bitMapArray = (bool*)malloc(sizeof(bool) * nBlocks);
-    }        
-        int nBlocks; // Numero de blocos de Datablock
-        bool *bitMapArray; // Array booleano com a quantidade de Datablocks
+    void setSize(int num){
+        numBlocks = num; 
+        bitMapArray = (bool*)malloc(sizeof(bool) * num);
+    }
+
+    int numBlocks; // Numero de blocos de Datablock
+    bool *bitMapArray; // Array booleano com a quantidade de Datablocks
 };
 
 // int main(){

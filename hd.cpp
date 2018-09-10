@@ -30,6 +30,7 @@ string nomeHD;
 FILE * configFile; // Ponteiro para o arquivo de configuração de HDs
 FILE * hd;    // Ponteiro para o HD que será criado
 SuperBlock superBlock;
+BitMapDataBlocks bitmapDataBlocks;
 Inode genericInode;
 Inode * inodes;
 char ** datablocks;
@@ -97,15 +98,15 @@ void createhd()
         writeSuperBlock();
         writeInodeBlocks();
         writeBitmapBlocks();
-        // for (int block = 0; block < (numBlocks - 1 - inodeBlocks - bitmapBlocks); block++)
-        // {
-        //     for (int byte = 0; byte < sizeBlock; byte++)
-        //     {
-        //         fputc(0, hd);
-        //         if (ferror(hd)) 
-        //             perror("Erro na escrita do arquivo");
-        //     }
-        // }
+        for (int block = 0; block < (numBlocks - 1 - inodeBlocks - bitmapBlocks); block++)
+        {
+            for (int byte = 0; byte < sizeBlock; byte++)
+            {
+                fputc(0, hd);
+                // if (ferror(hd)) 
+                //     perror("Erro na escrita do arquivo");
+            }
+        }
         fclose(hd); 
 
         string shortHdName = nomeHD.substr(0, nomeHD.find(".mvpfs"));
@@ -139,15 +140,37 @@ void selecionaHD(){
 
     numBlocks = superBlock.numBlocks;
     sizeBlock = superBlock.blockSize;
-    inodeBlocks = superBlock.firstDataBlock - 1;
+    inodeBlocks = superBlock.numInodeBlocks;
     
+    inodes = (Inode *) malloc(sizeof(Inode) * inodeBlocks);
+
+    int space = sizeBlock;
+
+    for(int i = 0; i < inodeBlocks; i++){
+        if(space < sizeof(Inode)){
+            fseek(hd, space, SEEK_CUR);
+            space = sizeBlock;
+        }
+        fread(&inodes[i], sizeof(Inode), 1, hd);
+        space-=sizeof(Inode);
+    }
+
+    //fread(inodes, sizeof(Inode), inodeBlocks, hd);
+
+    // Calcula o número de bitmap blocks 
     for(bitmapBlocks = 1; numBlocks - (1 + inodeBlocks + bitmapBlocks) > sizeBlock * bitmapBlocks; bitmapBlocks++);
 
-    // TODO: Fazer a leitura dos blocos de bitmap do arquivo
-    inodes = (Inode *) malloc(sizeof(Inode) * inodeBlocks);
-    fread(inodes, sizeof(Inode), inodeBlocks, hd);
-
+    // Calcula o número de datablocks
     numDataBlocks = numBlocks - 1 - inodeBlocks - bitmapBlocks;
+    // Inicializa a variável global de bitmap
+    bitmapDataBlocks.setSize(numBlocks);
+
+    // Lê do arquivo para a variável o bitmap
+    fread(bitmapDataBlocks.bitMapArray, sizeof(bool), numDataBlocks, hd);   
+
+    for(int i = 0; i < numDataBlocks; i++){
+        cout<<bitmapDataBlocks.bitMapArray[i]<<" ";
+    }
 
     datablocks = (char**) malloc(sizeof(char*) * numDataBlocks);
 
@@ -187,7 +210,7 @@ void writeSuperBlock(){
     superBlock.numFreeBlocks = numBlocks - 1;
     superBlock.firstInodeBlock = 1;
 
-    inodeBlocks = 0.03 * numBlocks;
+    inodeBlocks = 0.3 * numBlocks;
     
     superBlock.numInodeBlocks = inodeBlocks;
 
@@ -196,6 +219,12 @@ void writeSuperBlock(){
     superBlock.firstDataBlock = inodeBlocks + bitmapBlocks + 1;
 
     fwrite(&(superBlock), sizeof(SuperBlock), 1, hd);
+
+    int space = sizeBlock - sizeof(SuperBlock);
+
+    while(space--){
+        fputc(0, hd);
+    }
 
     // SuperBlock sp;
     // fseek(hd, 0, SEEK_SET);
@@ -206,6 +235,7 @@ void writeSuperBlock(){
 
 void writeInodeBlocks(){
     Inode root;
+    int space;
 
     root.flag = true;
     root.type = 0;
@@ -215,13 +245,22 @@ void writeInodeBlocks(){
 
     fwrite(&root, sizeof(Inode), 1, hd);
 
+    space = sizeBlock - sizeof(Inode);
+
     genericInode.flag = false;
     genericInode.type = 2;
     genericInode.father_inode = -1;
 
     for(int i = 1; i < inodeBlocks; i++){
+        if(sizeof(Inode) > space){
+            for(int j = 0; j < space; j++){
+                fputc(0, hd);
+            }
+            space = sizeBlock;
+        }
         genericInode.number = i;
         fwrite(&genericInode, sizeof(Inode), 1, hd);
+        space -= sizeof(Inode);
     }
 
     inodes = (Inode *) malloc(sizeof(Inode) * inodeBlocks);
@@ -269,9 +308,8 @@ void printSuperBlock(SuperBlock sp){
 }
 
 void writeBitmapBlocks(){
-    
-    BitMapDataBlock bitMapDB(numDataBlocks);
-    fwrite(bitMapDB.bitMapArray, bitMapDB.nBlocks, 1, hd);
+    bitmapDataBlocks.setSize(numBlocks);
+    fwrite(bitmapDataBlocks.bitMapArray, bitmapDataBlocks.numBlocks, 1, hd);
 }
 
 void updateHD(){
@@ -280,7 +318,7 @@ void updateHD(){
 
     fwrite(&(superBlock), sizeof(SuperBlock), 1, hd);
     fwrite(inodes, sizeof(Inode), inodeBlocks, hd);
-    // TODO: escrever bitmapblocks
+    fwrite(bitmapDataBlocks.bitMapArray, bitmapDataBlocks.numBlocks, 1, hd);
 
     for(int i = 0; i < numDataBlocks; i++){
         fputs(datablocks[i], hd);
@@ -320,4 +358,10 @@ void getclause(){
 			i++;
 		}
 	}
+}
+
+void dirhd(){
+
+
+    
 }
