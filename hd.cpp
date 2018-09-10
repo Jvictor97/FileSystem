@@ -392,14 +392,19 @@ void dirhd(){
 }
 
 void formathd(){
-    nomeHD = params[0] + ".mvpfs";
+    nomeHD = params[0]+".mvpfs";
 
     hd = fopen(nomeHD.c_str(), "r");
     fread(&superBlock, sizeof(SuperBlock), 1, hd);
+    fclose(hd);
     remove(nomeHD.c_str());
 
-    params[1] = superBlock.blockSize;
-    params[2] = superBlock.numBlocks;
+
+    sizeBlock_s = to_string(superBlock.blockSize);
+    params[1] = sizeBlock_s;
+
+    sizeBlock_s = to_string(superBlock.numBlocks);
+    params[2] = sizeBlock_s;
 
     createhd();
 }
