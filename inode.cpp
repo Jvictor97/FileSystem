@@ -6,7 +6,7 @@ public:
             blocks[i] = -1;
         }
 
-        father_inode = -1;
+        father_inode = 0;
         name[0] = '\0';
         type = 2;
     }
@@ -14,7 +14,7 @@ public:
     bool flag; // 0 - inativo(deletado) | 1 - ativo
     uint8_t type; // 0 - diretório | 1 - arquivo | 2 - undefined
     uint32_t number;
-    uint32_t father_inode; // -1 = inativo
+    uint32_t father_inode; // 0 = inativo
     char name[24];
     uint32_t blocks[7];
 };

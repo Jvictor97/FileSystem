@@ -8,6 +8,7 @@ This file is related to the functions and attributes of the virtual HD
 #include <sstream>
 #include <vector>
 #include <cmath>
+#include <fstream>
 
 // Classes para manipulação do HD
 #include "inode.cpp"
@@ -44,6 +45,7 @@ void createhd();
 void exit();
 void selecionaHD();
 void dirhd();
+void typehd();
 
 // Auxiliares:
 int strToInt(const string);
@@ -96,15 +98,25 @@ void createhd()
     }
     else
     {
+        fflush(hd);
         writeSuperBlock();
+        fflush(hd);
+        fseek(hd, 0, SEEK_END);
         writeInodeBlocks();
+        fflush(hd);
+        fseek(hd, 0, SEEK_END);
         writeBitmapBlocks();
-        for (int block = 0; block < (numBlocks - 1 - inodeBlocks - bitmapBlocks); block++)
+
+        numDataBlocks = 5; //numBlocks - 1 - inodeBlocks - bitmapBlocks;
+        fflush(hd);
+        fseek(hd, 0, SEEK_END);
+
+        for (int block = 0; block < numDataBlocks; block++)
         {
             for (int byte = 0; byte < sizeBlock; byte++)
             {
                 fputc(0, hd);
-                if (ferror(hd)) 
+                if(ferror(hd)) 
                     perror("Erro na escrita do arquivo");
             }
         }
@@ -213,7 +225,7 @@ void writeSuperBlock(){
     superBlock.numFreeBlocks = numBlocks - 1;
     superBlock.firstInodeBlock = 1;
 
-    inodeBlocks = 0.3 * numBlocks;
+    inodeBlocks = floor(0.3 * numBlocks);
     
     superBlock.numInodeBlocks = inodeBlocks;
 
@@ -221,6 +233,7 @@ void writeSuperBlock(){
     
     superBlock.firstDataBlock = inodeBlocks + bitmapBlocks + 1;
 
+    fflush(stdin);
     fwrite(&(superBlock), sizeof(SuperBlock), 1, hd);
 
     int space = sizeBlock - sizeof(SuperBlock);
@@ -229,11 +242,11 @@ void writeSuperBlock(){
         fputc(0, hd);
     }
 
-    // SuperBlock sp;
-    // fseek(hd, 0, SEEK_SET);
+    SuperBlock sp;
+    fseek(hd, 0, SEEK_SET);
 
-    // fread(&sp, sizeof(SuperBlock), 1, hd);
-    // printSuperBlock(sp);
+    fread(&sp, sizeof(SuperBlock), 1, hd);
+    printSuperBlock(sp);
 }
 
 void writeInodeBlocks(){
@@ -242,8 +255,8 @@ void writeInodeBlocks(){
 
     root.flag = true;
     root.type = 0;
-    root.number = 0;
-    root.father_inode = 0;
+    root.number = 1;
+    root.father_inode = 1;
     strncpy(root.name, "/", sizeof(Inode::name));
 
     fwrite(&root, sizeof(Inode), 1, hd);
@@ -252,9 +265,9 @@ void writeInodeBlocks(){
 
     genericInode.flag = false;
     genericInode.type = 2;
-    genericInode.father_inode = -1;
+    genericInode.father_inode = 0;
 
-    for(int i = 1; i < inodeBlocks; i++){
+    for(int i = 2; i <= inodeBlocks; i++){
         if(sizeof(Inode) > space){
             for(int j = 0; j < space; j++){
                 fputc(0, hd);
@@ -269,15 +282,15 @@ void writeInodeBlocks(){
     inodes = (Inode *) malloc(sizeof(Inode) * inodeBlocks);
     fseek(hd, sizeof(SuperBlock), SEEK_SET);
 
-    for(int i = 0; i < inodeBlocks; i++){
-        if(space < sizeof(Inode)){
-            fseek(hd, space, SEEK_CUR);
-            space = sizeBlock;
-        }
-        fread(&inodes[i], sizeof(Inode), 1, hd);
-        printInodes(inodes[i]);
-        space-=sizeof(Inode);
-    }
+    // for(int i = 0; i < inodeBlocks; i++){
+    //     if(space < sizeof(Inode)){
+    //         fseek(hd, space, SEEK_CUR);
+    //         space = sizeBlock;
+    //     }
+    //     fread(&inodes[i], sizeof(Inode), 1, hd);
+    //     printInodes(inodes[i]);
+    //     space-=sizeof(Inode);
+    // }
 
     cout << inodeBlocks << endl;
     cout << numBlocks << endl;
@@ -311,13 +324,13 @@ void printInodes(Inode i){
 }
 
 void printSuperBlock(SuperBlock sp){
-    printf("%s\n", sp.magicNumber);
-    printf("%s\n", sp.hdName);
-    printf("%d\n", sp.blockSize);
-    printf("%d\n", sp.numBlocks);
-    printf("%d\n", sp.numFreeBlocks);
-    printf("%d\n", sp.firstInodeBlock);
-    printf("%d\n", sp.firstDataBlock);
+    printf("Magic: %s\n", sp.magicNumber);
+    printf("Nome: %s\n", sp.hdName);
+    printf("BlockSize: %d\n", sp.blockSize);
+    printf("Num Blocks: %d\n", sp.numBlocks);
+    printf("Free Blocks: %d\n", sp.numFreeBlocks);
+    printf("First Inode: %d\n", sp.firstInodeBlock);
+    printf("First Data: %d\n", sp.firstDataBlock);
 }
 
 void writeBitmapBlocks(){
@@ -393,8 +406,8 @@ void dirhd(){
 
     for(int i = 0; i < 20 && hdList[i].nomeHD[0] != 0; i++){
         cout<<"\nNome do HD: "<<hdList[i].nomeHD<<endl
-            <<"Tamanho do Bloco: "<<hdList[i].blockSize<<endl
-            <<"Numero de Blocos: "<<hdList[i].numBlocks<<endl;
+            <<"Tamanho do Bloco: "<<hdList[i].blockSize<<" bytes"<<endl
+            <<"Numero de Blocos: "<<hdList[i].numBlocks<<" blocos"<<endl;
     }
     
     fclose(configFile);
@@ -416,4 +429,58 @@ void formathd(){
     params[2] = sizeBlock_s;
 
     createhd();
+}
+
+void typehd(){
+
+    nomeHD = params[0] + ".mvpfs";
+    configFile = fopen(".config", "r");
+    fflush(hd);
+    fflush(stdin);
+    fseek(configFile, 0, SEEK_SET);
+    fread(hdList, sizeof(Config), 20, configFile);
+
+    int x;
+
+    for(x = 0; hdList[x].nomeHD != params[0]; x++);
+
+    sizeBlock = hdList[x].blockSize;
+    numBlocks = hdList[x].numBlocks;
+
+    //cout<<"SizeBlock: "<<sizeBlock<<"\nnumBlocks: "<<numBlocks<<endl;
+
+    char * buffer = (char *) malloc(sizeof(char) * sizeBlock * numBlocks);
+
+    hd = fopen(nomeHD.c_str(), "r");
+    fflush(stdin);
+    fflush(hd);
+    fseek(hd, 0, SEEK_SET);
+    //fscanf(hd, "%d", buffer);
+
+    int id = 0;
+    while(id < sizeBlock * numBlocks){
+        fread(&buffer[id], sizeof(char), 1, hd);
+        id++;
+    }
+
+    for(int i = 0; i < sizeBlock * numBlocks; i++){
+        if(buffer[i] != 0)
+            //if(buffer[i] > 32 && buffer[i] < 126)
+                printf("%x ", buffer[i]);
+            //else
+            //    printf("? ");
+    }
+    cout<<endl;
+
+    for(int i = 0; i < sizeBlock * numBlocks; i++){
+        if(buffer[i] != 0)
+            if(buffer[i] > 32 && buffer[i] < 126)
+                printf("%c ", buffer[i]);
+            else
+                printf("? ");
+    }
+
+    cout<<endl;
+
+    free(buffer);
 }

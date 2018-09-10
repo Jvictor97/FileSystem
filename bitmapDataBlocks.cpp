@@ -9,11 +9,14 @@ class BitMapDataBlocks{
     public:
     void setSize(int num){
         numBlocks = num; 
-        bitMapArray = (bool*)malloc(sizeof(bool) * num);
+        bitMapArray = (char*)malloc(sizeof(char) * num);
+        for(int i = 0; i < num; i++){
+            bitMapArray[i] = 0;
+        }
     }
 
     int numBlocks; // Numero de blocos de Datablock
-    bool *bitMapArray; // Array booleano com a quantidade de Datablocks
+    char *bitMapArray; // Array booleano com a quantidade de Datablocks
 };
 
 // struct Inode{

@@ -7,8 +7,13 @@ class SuperBlock{
 public:
 
     SuperBlock(){
-        magicNumber[0] = '\0';
-        hdName[0] = '\0';
+        for(int i = 0; i < sizeof(magicNumber); i++){
+            magicNumber[i] = 0;
+        }
+
+        for(int i = 0; i < sizeof(hdName); i++){
+            hdName[i] = 0;
+        }
     }
     char magicNumber[8];
     char hdName[32];

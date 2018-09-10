@@ -17,6 +17,7 @@ int main() {
 	funcs["createhd"] = createhd;
 	funcs["formathd"] = formathd;
 	funcs["dirhd"] = dirhd;
+	funcs["typehd"] = typehd;
 	funcs["exit"] = exit;
 	funcs["help"] = help;
 	funcs["?"] = help;
