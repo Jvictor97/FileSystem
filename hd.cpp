@@ -297,6 +297,7 @@ void printInodes(Inode i){
         printf("Block[%d]: %d\n", j, i.blocks[j]);
     }
     cout<<endl;
+    cout << sizeof(Inode) << endl;
 }
 
 void printSuperBlock(SuperBlock sp){

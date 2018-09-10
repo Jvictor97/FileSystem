@@ -1,21 +1,22 @@
-class Inode{
+struct Inode{
 
-public:
-    Inode(){
-        for(int i = 0; i < 7; i++){
-            blocks[i] = -1;
-        }
-        father_inode = -1;
-        name[0] = '\0';
-        type = 2;
-    }
+//public:
+    // Inode(){
+    //     // for(int i = 0; i < 7; i++){
+    //     //     blocks[i] = -1;
+    //     // }
+
+    //     father_inode = -1;
+    //     name[0] = '\0';
+    //     type = 2;
+    // }
 
     bool flag; // 0 - inativo(deletado) | 1 - ativo
-    uint8_t type; // 0 - diretório | 1 - arquivo | 2 - undefined
-    uint32_t number;
-    uint32_t father_inode; // -1 = inativo
+    char type; // 0 - diretório | 1 - arquivo | 2 - undefined
+    char number[4];
+    char father_inode[4]; // -1 = inativo
     char name[24];
-    uint32_t blocks[7];
+    char blocks[7*4];
 };
 
 // int main(){
