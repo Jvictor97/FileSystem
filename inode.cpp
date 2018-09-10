@@ -1,10 +1,11 @@
-class Inode{
+struct Inode{
 
 public:
     Inode(){
         for(int i = 0; i < 7; i++){
             blocks[i] = -1;
         }
+
         father_inode = -1;
         name[0] = '\0';
         type = 2;

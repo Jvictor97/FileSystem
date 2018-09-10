@@ -16,21 +16,32 @@ class BitMapDataBlocks{
     bool *bitMapArray; // Array booleano com a quantidade de Datablocks
 };
 
+// struct Inode{
+
+// public:
+//     Inode(){
+//         for(int i = 0; i < 7; i++){
+//              blocks[i] = -1;
+//         }
+
+//          father_inode = -1;
+//          name[0] = '\0';
+//          type = 2;
+//     }
+
+//     bool flag; // 0 - inativo(deletado) | 1 - ativo
+//     char type; // 0 - diretório | 1 - arquivo | 2 - undefined
+//     char number[4];
+//     char father_inode[4]; // -1 = inativo
+//     char name[24];
+//     char blocks[7*4];
+// };
+
 // int main(){
+  
+//     Inode str;
 
-//     BitMapDataBlock bitMapDB(100);
-//     FILE* file = fopen("fileHD", "w+");
-//     fwrite(bitMapDB.bitMapArray, bitMapDB.nBlocks, 1, file);
+//     cout << sizeof(str) << endl;
 
-//     cout << sizeof(bitMapDB.bitMapArray) << endl;
-
-//     fclose(file);
-//     // cout << bitMap.nBlocks <<endl;
-//     // int i = 0;
-//     // for(i = 0; i < bitMap.nBlocks; i++){
-//     //     cout << bitMap.bitMapArray[i] << endl;
-//     // }
-//     // cout << i << endl;
-    
-//     return 0;
+//    return 0;
 // }

@@ -170,9 +170,9 @@ void selecionaHD(){
 
     cout<<numDataBlocks;
 
-    // for(int i = 0; i < numDataBlocks; i++){
-    //     cout<<bitmapDataBlocks.bitMapArray[i]<<" ";
-    // }
+    for(int i = 0; i < numDataBlocks; i++){
+        cout<<bitmapDataBlocks.bitMapArray[i]<<" ";
+    }
 
     datablocks = (char**) malloc(sizeof(char*) * numDataBlocks);
 
@@ -269,9 +269,18 @@ void writeInodeBlocks(){
     fseek(hd, sizeof(SuperBlock), SEEK_SET);
 
     for(int i = 0; i < inodeBlocks; i++){
+        if(space < sizeof(Inode)){
+            fseek(hd, space, SEEK_CUR);
+            space = sizeBlock;
+        }
         fread(&inodes[i], sizeof(Inode), 1, hd);
         printInodes(inodes[i]);
-    }   
+        space-=sizeof(Inode);
+    }
+
+    cout << inodeBlocks << endl;
+    cout << numBlocks << endl;
+
 }
 
 int strToInt(const string str){
@@ -297,6 +306,7 @@ void printInodes(Inode i){
         printf("Block[%d]: %d\n", j, i.blocks[j]);
     }
     cout<<endl;
+    //cout << sizeof(Inode) << endl;
 }
 
 void printSuperBlock(SuperBlock sp){
