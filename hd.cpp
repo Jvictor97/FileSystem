@@ -103,8 +103,8 @@ void createhd()
             for (int byte = 0; byte < sizeBlock; byte++)
             {
                 fputc(0, hd);
-                // if (ferror(hd)) 
-                //     perror("Erro na escrita do arquivo");
+                if (ferror(hd)) 
+                    perror("Erro na escrita do arquivo");
             }
         }
         fclose(hd); 
@@ -168,9 +168,11 @@ void selecionaHD(){
     // Lê do arquivo para a variável o bitmap
     fread(bitmapDataBlocks.bitMapArray, sizeof(bool), numDataBlocks, hd);   
 
-    for(int i = 0; i < numDataBlocks; i++){
-        cout<<bitmapDataBlocks.bitMapArray[i]<<" ";
-    }
+    cout<<numDataBlocks;
+
+    // for(int i = 0; i < numDataBlocks; i++){
+    //     cout<<bitmapDataBlocks.bitMapArray[i]<<" ";
+    // }
 
     datablocks = (char**) malloc(sizeof(char*) * numDataBlocks);
 
