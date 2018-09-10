@@ -35,6 +35,7 @@ Inode genericInode;
 Inode * inodes;
 char ** datablocks;
 Config config;
+Config hdList[20];
 
 typedef void (*functions)(void); // function pointer type
 
@@ -386,9 +387,17 @@ void getclause(){
 }
 
 void dirhd(){
+    configFile = fopen(".config", "r");
 
+    fread(hdList, sizeof(Config), 20, configFile);
 
+    for(int i = 0; i < 20 && hdList[i].nomeHD[0] != 0; i++){
+        cout<<"\nNome do HD: "<<hdList[i].nomeHD<<endl
+            <<"Tamanho do Bloco: "<<hdList[i].blockSize<<endl
+            <<"Numero de Blocos: "<<hdList[i].numBlocks<<endl;
+    }
     
+    fclose(configFile);
 }
 
 void formathd(){
