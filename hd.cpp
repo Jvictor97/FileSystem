@@ -170,9 +170,9 @@ void selecionaHD(){
 
     cout<<numDataBlocks;
 
-    // for(int i = 0; i < numDataBlocks; i++){
-    //     cout<<bitmapDataBlocks.bitMapArray[i]<<" ";
-    // }
+    for(int i = 0; i < numDataBlocks; i++){
+        cout<<bitmapDataBlocks.bitMapArray[i]<<" ";
+    }
 
     datablocks = (char**) malloc(sizeof(char*) * numDataBlocks);
 
@@ -297,7 +297,7 @@ void printInodes(Inode i){
         printf("Block[%d]: %d\n", j, i.blocks[j]);
     }
     cout<<endl;
-    cout << sizeof(Inode) << endl;
+    //cout << sizeof(Inode) << endl;
 }
 
 void printSuperBlock(SuperBlock sp){
