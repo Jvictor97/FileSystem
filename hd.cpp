@@ -269,9 +269,18 @@ void writeInodeBlocks(){
     fseek(hd, sizeof(SuperBlock), SEEK_SET);
 
     for(int i = 0; i < inodeBlocks; i++){
+        if(space < sizeof(Inode)){
+            fseek(hd, space, SEEK_CUR);
+            space = sizeBlock;
+        }
         fread(&inodes[i], sizeof(Inode), 1, hd);
         printInodes(inodes[i]);
-    }   
+        space-=sizeof(Inode);
+    }
+
+    cout << inodeBlocks << endl;
+    cout << numBlocks << endl;
+
 }
 
 int strToInt(const string str){
