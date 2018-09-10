@@ -380,3 +380,16 @@ void dirhd(){
 
     
 }
+
+void formathd(){
+    nomeHD = params[0] + ".mvpfs";
+
+    hd = fopen(nomeHD.c_str(), "r");
+    fread(&superBlock, sizeof(SuperBlock), 1, hd);
+    remove(nomeHD.c_str());
+
+    params[1] = superBlock.blockSize;
+    params[2] = superBlock.numBlocks;
+
+    createhd();
+}
