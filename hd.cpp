@@ -447,21 +447,10 @@ void typehd(){
     fread(hdList, sizeof(Config), 20, configFile);
 
     int x;
+    for(x = 0; hdList[x].nomeHD != params[0]; x++);
 
-    // for(int i = 0; i < 20; i++){
-    //     cout<<"Nome: "<<hdList[i].nomeHD<<endl
-    //         <<"Size: "<<hdList[i].blockSize<<endl
-    //         <<"Blocks: "<<hdList[i].numBlocks<<endl;
-    // }
-
-    // for(x = 0; hdList[x].nomeHD != params[0]; x++);
-
-    // sizeBlock = hdList[x].blockSize;
-    // numBlocks = hdList[x].numBlocks;
-    sizeBlock = 64;
-    numBlocks = 10;
-
-    //cout<<"SizeBlock: "<<sizeBlock<<"\nnumBlocks: "<<numBlocks<<endl;
+    sizeBlock = hdList[x].blockSize;
+    numBlocks = hdList[x].numBlocks;
 
     char * buffer = (char *) malloc(sizeof(char) * sizeBlock * numBlocks);
 
@@ -469,7 +458,6 @@ void typehd(){
     fflush(stdin);
     fflush(hd);
     fseek(hd, 0, SEEK_SET);
-    //fscanf(hd, "%d", buffer);
 
     int id = 0;
     while(id < sizeBlock * numBlocks){
@@ -477,20 +465,23 @@ void typehd(){
         id++;
     }
 
+    cout<<"\nHexadecimal:"<<endl;
+
     for(int i = 0; i < sizeBlock * numBlocks; i++){
         if(buffer[i] != 0)
-            //if(buffer[i] > 32 && buffer[i] < 126)
+            if(buffer[i] > 32 && buffer[i] < 126)
                 printf("%x ", buffer[i]);
-            //else
-            //    printf("? ");
+            else
+                printf("? ");
     }
-    cout<<endl;
+
+    cout<<endl<<endl<<"Char:"<<endl;
 
     for(int i = 0; i < sizeBlock * numBlocks; i++){
         if(buffer[i] != 0)
             if(buffer[i] > 32 && buffer[i] < 126)
                 printf("%c ", buffer[i]);
-            else
+           else
                 printf("? ");
     }
 
