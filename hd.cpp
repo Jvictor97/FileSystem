@@ -105,21 +105,21 @@ void createhd()
         writeInodeBlocks();
         fflush(hd);
         fseek(hd, 0, SEEK_END);
-        writeBitmapBlocks();
+        //writeBitmapBlocks();
 
         numDataBlocks = 5; //numBlocks - 1 - inodeBlocks - bitmapBlocks;
         fflush(hd);
         fseek(hd, 0, SEEK_END);
 
-        for (int block = 0; block < numDataBlocks; block++)
-        {
-            for (int byte = 0; byte < sizeBlock; byte++)
-            {
-                fputc(0, hd);
-                if(ferror(hd)) 
-                    perror("Erro na escrita do arquivo");
-            }
-        }
+        // for (int block = 0; block < numDataBlocks; block++)
+        // {
+        //     for (int byte = 0; byte < sizeBlock; byte++)
+        //     {
+        //         fputc(0, hd);
+        //         if(ferror(hd)) 
+        //             perror("Erro na escrita do arquivo");
+        //     }
+        // }
         fclose(hd); 
 
         string shortHdName = nomeHD.substr(0, nomeHD.find(".mvpfs"));
@@ -257,6 +257,9 @@ void writeInodeBlocks(){
     root.type = 0;
     root.number = 1;
     root.father_inode = 1;
+
+    //printf("%x ", )
+
     strncpy(root.name, "/", sizeof(Inode::name));
 
     fwrite(&root, sizeof(Inode), 1, hd);
@@ -281,16 +284,19 @@ void writeInodeBlocks(){
 
     inodes = (Inode *) malloc(sizeof(Inode) * inodeBlocks);
     fseek(hd, sizeof(SuperBlock), SEEK_SET);
+    fflush(hd);
+    fflush(stdin);
 
-    // for(int i = 0; i < inodeBlocks; i++){
-    //     if(space < sizeof(Inode)){
-    //         fseek(hd, space, SEEK_CUR);
-    //         space = sizeBlock;
-    //     }
-    //     fread(&inodes[i], sizeof(Inode), 1, hd);
-    //     printInodes(inodes[i]);
-    //     space-=sizeof(Inode);
-    // }
+    for(int i = 0; i < inodeBlocks; i++){
+        if(space < sizeof(Inode)){
+            fseek(hd, space, SEEK_CUR);
+            space = sizeBlock;
+        }
+        fread(&inodes[i], sizeof(Inode), 1, hd);
+        cout<<endl;
+        printInodes(inodes[i]);
+        space-=sizeof(Inode);
+    }
 
     cout << inodeBlocks << endl;
     cout << numBlocks << endl;
@@ -442,10 +448,18 @@ void typehd(){
 
     int x;
 
-    for(x = 0; hdList[x].nomeHD != params[0]; x++);
+    // for(int i = 0; i < 20; i++){
+    //     cout<<"Nome: "<<hdList[i].nomeHD<<endl
+    //         <<"Size: "<<hdList[i].blockSize<<endl
+    //         <<"Blocks: "<<hdList[i].numBlocks<<endl;
+    // }
 
-    sizeBlock = hdList[x].blockSize;
-    numBlocks = hdList[x].numBlocks;
+    // for(x = 0; hdList[x].nomeHD != params[0]; x++);
+
+    // sizeBlock = hdList[x].blockSize;
+    // numBlocks = hdList[x].numBlocks;
+    sizeBlock = 64;
+    numBlocks = 10;
 
     //cout<<"SizeBlock: "<<sizeBlock<<"\nnumBlocks: "<<numBlocks<<endl;
 
