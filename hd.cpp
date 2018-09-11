@@ -24,6 +24,12 @@ This file is related to the functions and attributes of the virtual HD
 #include "config.cpp"
 #include "bitmapDataBlocks.cpp"
 
+// Header para declaração de variaveis globais
+#include "globals.h"
+
+// Classe para manipulação de arquivos
+#include "file.cpp"
+
 using namespace std;
 
 string params[10];
@@ -45,6 +51,7 @@ Inode * inodes;
 char ** datablocks;
 Config config;
 Config hdList[20];
+Inode actualInode;
 
 typedef void (*functions)(void); // function pointer type
 
@@ -144,6 +151,7 @@ void createhd()
         fwrite(&config, sizeof(Config), 1, configFile);
         fclose(configFile);
 
+
         return;
     }
 }
@@ -189,6 +197,8 @@ void selecionaHD(){
         printInodes(inodes[i]);
     }
 
+    actualInode = inodes[0];
+    
     //fread(inodes, sizeof(Inode), inodeBlocks, hd);
 
     // Calcula o número de bitmap blocks 
@@ -234,6 +244,7 @@ void selecionaHD(){
             cmd = "";
         }
 	}
+    
 }
 
 void exit(){

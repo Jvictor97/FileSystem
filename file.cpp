@@ -1,5 +1,12 @@
 #include <iostream>
+#include "globals.h"
 
 using namespace std;
 
-//create
+void
+void testandoGlobal ()
+{
+    
+}
+
+

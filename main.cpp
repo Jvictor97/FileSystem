@@ -7,6 +7,7 @@
 #include <bitset>
 #include "hd.cpp"
 #include "help.cpp"
+#include "dir.cpp"
 
 using namespace std;
 
