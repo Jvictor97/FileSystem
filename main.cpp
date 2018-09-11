@@ -25,8 +25,6 @@ int main() {
 	cout<<"\n* Seja bem vindo ao MVPFS *";
 	cout<<"\nDigite a funcao que deseja executar:\n\n";
 
-	printf("%d", sizeof(Inode));
-
 	while(cmd != "exit"){
 		printf(">");
 		getclause();
@@ -38,10 +36,14 @@ int main() {
 			selecionaHD();
 		}
 		else
-			if(funcs.find(cmd.c_str()) == funcs.end())
+			if(cmd == "")
+				printf("");
+			else if(funcs.find(cmd.c_str()) == funcs.end())
 				cout<<"ERRO: Esta funcao nao existe...\n";
-			else
+			else{
 				funcs[cmd]();
+				cmd = "";
+			}
 	}
 
 
