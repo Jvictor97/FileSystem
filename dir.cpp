@@ -33,13 +33,24 @@ void createdir(){
 	string name = params[0];
 	int i, j;
 
+	for(int a = 0; a < 7; a++){
+		if(actualInode.blocks[a] - 1 < totalInodes
+		&& inodes[actualInode.blocks[a] - 1].flag == 1 
+		&& inodes[actualInode.blocks[a] - 1].type == 1 
+		&& inodes[actualInode.blocks[a] - 1].name == name
+		&& inodes[actualInode.blocks[a] - 1].father_inode == actualInode.number){
+			cout<<RED<<"ERRO: este caminho ja contem um diretorio com o nome \""<<YELLOW<<name<<RED<<"\"."<<endl;
+			return;
+		}
+	}
+
 	// Encontra o proximo Inode disponivel
 	for(i = 0; i < totalInodes && inodes[i].flag != 0; i++);
 
 	// Caso todos os inodes estejam preenchidos imprime a mensagem de erro e sai da função
 	if(i == totalInodes){
 		cout<<RED<<"\nERRO: Numero máximo de inodes utilizado..."<<RESET<<endl;
-		cout<<YELLOW<<"Hint: Apague algum arquivo/diretorio ou formate seu HD para liberar espaço!"<<RESET<<endl;
+		cout<<YELLOW<<"Hint: Apague algum arquivo/diretorio ou formate seu HD para liberar espaco!"<<RESET<<endl;
 		return;
 	}
 
@@ -47,8 +58,8 @@ void createdir(){
 	for(j = 0; actualInode.blocks[j] != 0; j++){
 		//cout<<"\nConteudo do block["<<j<<"]: "<<actualInode.blocks[j]<<endl;
 		if(j > 6){
-			cout<<RED<<"\nERRO: Numero máximo de blocos utilizado..."<<RESET<<endl;
-			cout<<YELLOW<<"Hint: Apague algum arquivo/diretorio ou formate seu HD para liberar espaço!"<<RESET<<endl;
+			cout<<RED<<"\nERRO: Numero máximo de blocos de endereco utilizado..."<<RESET<<endl;
+			cout<<YELLOW<<"Hint: Apague algum arquivo/diretorio ou formate seu HD para liberar espaco!"<<RESET<<endl;
 			return;
 		}
 	}
