@@ -25,6 +25,8 @@ int main() {
 	cout<<"\n* Seja bem vindo ao MVPFS *";
 	cout<<"\nDigite a funcao que deseja executar:\n\n";
 
+	printf("%d", sizeof(Inode));
+
 	while(cmd != "exit"){
 		printf(">");
 		getclause();
