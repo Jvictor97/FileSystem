@@ -1,9 +1,32 @@
+#ifndef DIR_CPP
+#define DIR_CPP
+
 #include <iostream>
 
+#define RED     "\x1b[31m"
+#define GREEN   "\x1b[32m"
+#define YELLOW  "\x1b[33m"
+#define BLUE    "\x1b[34m"
+#define MAGENTA "\x1b[35m"
+#define CYAN    "\x1b[36m"
+#define RESET   "\x1b[0m"
 
 #include "globals.h"
 using namespace std;
 
+void printInode(Inode i){
+    printf("Flag: %d\n", i.flag);
+    printf("Type: %d\n", i.type);
+    printf("Number: %d\n", i.number);
+    printf("Father: %d\n", i.father_inode);
+    printf("Name: %s\n", i.name);
+
+    for(int j = 0; j < 7; j++){
+        printf("Block[%d]: %d\n", j, i.blocks[j]);
+    }
+    cout<<endl;
+    //cout << sizeof(Inode) << endl;
+}
 
 void createdir(){
 
@@ -11,74 +34,85 @@ void createdir(){
 	int i, j;
 
 	// Encontra o proximo Inode disponivel
-	for(i = 0; inodes[i].flag != 0; i++);
+	for(i = 0; i < totalInodes && inodes[i].flag != 0; i++);
+
+	// Caso todos os inodes estejam preenchidos imprime a mensagem de erro e sai da função
+	if(i == totalInodes){
+		cout<<RED<<"\nERRO: Numero máximo de inodes utilizado..."<<RESET<<endl;
+		cout<<YELLOW<<"Hint: Apague algum arquivo/diretorio ou formate seu HD para liberar espaço!"<<RESET<<endl;
+		return;
+	}
 
 	// Encontra 
 	for(j = 0; actualInode.blocks[j] != 0; j++){
+		//cout<<"\nConteudo do block["<<j<<"]: "<<actualInode.blocks[j]<<endl;
 		if(j > 6){
-			cout << "Numero máximo de blocos utilizado" << endl;
+			cout<<RED<<"\nERRO: Numero máximo de blocos utilizado..."<<RESET<<endl;
+			cout<<YELLOW<<"Hint: Apague algum arquivo/diretorio ou formate seu HD para liberar espaço!"<<RESET<<endl;
 			return;
 		}
 	}
 
 	inodes[i].flag = 1;
-	strncpy(inodes[i], name.c_str(), sizeof(Inode::name));
+	strncpy(inodes[i].name, name.c_str(), sizeof(Inode::name));
 	inodes[i].type = 1;
 	inodes[i].father_inode = actualInode.number;
-	actualInode.blocks[j] = inodes[i].number;
+	inodes[actualInode.number - 1].blocks[j] = actualInode.blocks[j] = inodes[i].number;
+	// cout<<"PAI:\n";
+	// printInode(actualInode);
+	// cout<<"Filho:\n";
+	// printInode(inodes[i]);
+
 }
 
 void cd(){
+	// cout<<"Root:"<<endl;
+	// printInode(inodes[0]);
 
-	string name = params[0];
+	// cout<<"Estava em: "<<endl;
+	// printInode(actualInode);
+
+	string dirname = params[0];
 	int i,j;
 	// cd inode.name 
 
-	for(i = 0; i < inodeBlocks; i++){
-		if(inodes[actualInode.blocks[i] -1].flag == 1 
-			&& inodes[actualInode.blocks[i] -1].type == 1 
-			&& inodes[actualInode.blocks[i] -1].father_inode == actualInode.number)
+	if(dirname == ".."){
+		if(actualInode.number == 1){
+			cout<<RED<<"ERRO: voce ja esta no root!!!"<<RESET<<endl;
+			return;
+		}
+		if(inodes[actualInode.father_inode - 1].number == 1)
+			location = location.substr(0, location.find(actualInode.name));
+		else
+			location = location.substr(0, location.find(actualInode.name) - 1);
+		
+		actualInode = inodes[actualInode.father_inode - 1];
+		// cout<<"Inode Atual: "<<endl;
+		// printInode(actualInode);
+		return;
+	}
+
+	for(i = 0; i < 7; i++){
+		if(actualInode.blocks[i] - 1 < totalInodes
+			&& inodes[actualInode.blocks[i] - 1].flag == 1 
+			&& inodes[actualInode.blocks[i] - 1].type == 1 
+			&& inodes[actualInode.blocks[i] - 1].name == dirname
+			&& inodes[actualInode.blocks[i] - 1].father_inode == actualInode.number)
 		{
-			actualInode = inodes[actualInode.blocks[i] -1];
-		}else{
-			cout << "O diretorio nao existe" << endl;
+			Inode prevInode = actualInode;
+			actualInode = inodes[actualInode.blocks[i] - 1];
+
+			if(prevInode.number == 1)
+				location += actualInode.name;
+			else 
+				location = location + "/" + actualInode.name;
+
+			// cout<<"Inode Atual"<<endl;
+			// printInode(actualInode);
+			return;
 		}
 	}
-	
+	cout<<RED<<"ERRO: o diretorio nao existe..."<<RESET<<endl;
 }
-// void createdir(){
-// 	string folder_name;
-// 	if(cin>>createdir>>folder_name){
-// 		const int dir_err = mkdir(folder_name.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-// 		if (dir_err == -1) {
-// 			perror("Erro");
-// 			exit(1);
-// 		}	
-// 	}
 
-	
-// 	#elif defined WIN32
-// 	if(mkdir(folder_name.c_str()) != 0){
-// 			perror("Erro");
-// 		}
-// 		else{
-// 			puts("Diretorio Criado com Sucesso.");
-// 		}
-	
-// 	#elif defined WIN64 
-// 	if(mkdir(folder_name.c_str()) != 0){
-// 			perror("Erro");
-// 		}
-// 		else{
-// 			puts("Diretorio Criado com Sucesso.");
-// 		}
-
-// 	#else
-// 	#error Plataforma n�o suportada
-// 	#endif
-
-// }
-
-// #else
-// #error Plataforma n�o suportada
-// #endif
+#endif

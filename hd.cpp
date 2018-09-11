@@ -1,3 +1,6 @@
+#ifndef HD_CPP
+#define HD_CPP
+
 /*
 This file is related to the functions and attributes of the virtual HD
 */
@@ -30,6 +33,9 @@ This file is related to the functions and attributes of the virtual HD
 // Classe para manipulação de arquivos
 #include "file.cpp"
 
+// Classe para manipulação de diretórios
+#include "dir.cpp"
+
 using namespace std;
 
 string params[10];
@@ -39,6 +45,8 @@ int sizeBlock;
 int inodeBlocks;
 int bitmapBlocks;
 int numDataBlocks;
+int inodesPerBlock;
+int totalInodes;
 string numBlocks_s;
 string sizeBlock_s;
 string nomeHD;
@@ -52,6 +60,7 @@ char ** datablocks;
 Config config;
 Config hdList[20];
 Inode actualInode;
+string location;
 
 typedef void (*functions)(void); // function pointer type
 
@@ -73,6 +82,7 @@ void printBitmap(char *);
 void updateHD();
 void exitHD();
 void getclause();
+void printDataBlocks();
 
 // Cria um arquivo com o nome 'nomeHD', o número de blocos 
 // 'numBlocks' e cada bloco com tamanho 'sizeBlock'
@@ -109,7 +119,7 @@ void createhd()
     // Cria o arquivo HD para escrita
     hd = fopen(nomeHD.c_str(), "w+");
     if (hd == NULL) { 
-        perror("Erro na criacao do arquivo");
+        perror(RED "Erro na criacao do arquivo" RESET);
         return; 
     }
     else
@@ -135,7 +145,7 @@ void createhd()
             {
                 fputc(0, hd);
                 if(ferror(hd)) 
-                    perror("Erro na escrita do arquivo");
+                    perror(RED "Erro na escrita do arquivo" RESET);
             }
         }
         fclose(hd); 
@@ -157,32 +167,46 @@ void createhd()
 }
 
 void selecionaHD(){
-    string print;
+    // ÁREA DE MAPEAMENTO DE FUNÇÕES DE ESCOPO DO HD
 	map<std::string, functions> localMap;
+    localMap["createdir"] = createdir;
+    localMap["cd"] = cd;
 	localMap["exit"] = exitHD;
+    // FIM DA ÁREA DE MAPEAMENTO
 
     hd = fopen(nomeHD.c_str(), "r+");
 
 	if(hd == NULL){
-		cout<<"ERRO: Nenhum HD encontrado com este nome...\n";
+		cout<<RED<<"ERRO: Nenhum HD encontrado com este nome...\n"<<RESET;
 		return;
 	}
 
     fread(&superBlock, sizeof(SuperBlock), 1, hd);
 
     // REMOVER PRINT SUPERBLOCK
-    cout<<"\nSuperBlock: "<<endl;
-    printSuperBlock(superBlock);
+    // cout<<"\nSuperBlock: "<<endl;
+    // printSuperBlock(superBlock);
 
     numBlocks = superBlock.numBlocks;
     sizeBlock = superBlock.blockSize;
     inodeBlocks = superBlock.numInodeBlocks;
+
+    int offsetInodeBlock = superBlock.firstInodeBlock * sizeBlock;
+
+    fseek(hd, offsetInodeBlock, SEEK_SET);
+
+    inodesPerBlock = floor(sizeBlock / sizeof(Inode));
+
+    // REMOVER INODES PER BLOCK
+    // cout<<"\ninodesPerBlock: "<<inodesPerBlock<<endl;
+
+    totalInodes = inodesPerBlock * inodeBlocks;
     
-    inodes = (Inode *) malloc(sizeof(Inode) * inodeBlocks);
+    inodes = (Inode *) malloc(sizeof(Inode) * inodesPerBlock * inodeBlocks);
 
     int space = sizeBlock;
 
-    for(int i = 0; i < inodeBlocks; i++){
+    for(int i = 0; i < totalInodes; i++){
         if(space < sizeof(Inode)){
             fseek(hd, space, SEEK_CUR);
             space = sizeBlock;
@@ -192,15 +216,14 @@ void selecionaHD(){
     }
 
     // REMOVER PRINT INODES
-    cout<<"\nInodes: "<<endl;
-    for(int i = 0; i < inodeBlocks; i++){
-        printInodes(inodes[i]);
-    }
+    // cout<<"\nInodes: "<<endl;
+    // for(int i = 0; i < totalInodes; i++){
+    //     printInodes(inodes[i]);
+    // }
 
+    // Seta o Inode atual como o Root
     actualInode = inodes[0];
     
-    //fread(inodes, sizeof(Inode), inodeBlocks, hd);
-
     // Calcula o número de bitmap blocks 
     for(bitmapBlocks = 1; numBlocks - (1 + inodeBlocks + bitmapBlocks) > sizeBlock * bitmapBlocks; bitmapBlocks++);
 
@@ -213,35 +236,40 @@ void selecionaHD(){
     fread(bitmapDataBlocks.bitMapArray, sizeof(bool), numDataBlocks, hd); 
 
     // REMOVER PRINT BITMAP:
-    cout<<"\nBitmap: "<<endl;
-    printBitmap(bitmapDataBlocks.bitMapArray);
-    return;
+    // cout<<"Bitmap: "<<endl;
+    // printBitmap(bitmapDataBlocks.bitMapArray);
 
-    //cout<<numDataBlocks;
+    int offsetDataBlock = superBlock.firstDataBlock * sizeBlock;
+
+    fseek(hd, offsetDataBlock, SEEK_SET);
 
     datablocks = (char**) malloc(sizeof(char*) * numDataBlocks);
 
     for(int i = 0; i < numDataBlocks; i++){
         datablocks[i] = (char*) malloc(sizeof(char) * sizeBlock);
+        fread(datablocks[i], sizeBlock, 1, hd);
     }
-
-    fread(datablocks, sizeof(sizeBlock), numDataBlocks, hd);
+    
+    // REMOVER PRINT DATABLOCKS:
+    // cout<<"\nDataBlocks:\n";
+    // printDataBlocks();
 
     fclose(hd);
 
     string simpleHdName = nomeHD.substr(0, nomeHD.find(".mvpfs"));
+    location = "/";
 
-    while(cmd != "exit"){
-		cout<<simpleHdName<<"# ";
+    while(cmd != "exitHD"){
+		cout<<CYAN<<simpleHdName<<RESET<<":"<<location<<"> ";
 		getclause();
 
         if(cmd == "")
             printf("");
         else if(localMap.find(cmd.c_str()) == localMap.end())
-            cout<<"ERRO: Esta funcao nao existe...\n";
+            cout<<RED"ERRO: Esta funcao nao existe...\n"<<RESET;
         else{
             localMap[cmd]();
-            cmd = "";
+            cmd = cmd != "exit" ? "" : "exitHD";
         }
 	}
     
@@ -298,6 +326,7 @@ void writeInodeBlocks(){
     root.father_inode = 1;
 
     //printf("%x ", )
+    inodesPerBlock = floor(sizeBlock / sizeof(Inode));
 
     strncpy(root.name, "/", sizeof(Inode::name));
 
@@ -306,10 +335,14 @@ void writeInodeBlocks(){
     space = sizeBlock - sizeof(Inode);
 
     genericInode.flag = false;
-    genericInode.type = 2;
+    genericInode.type = 0;
     genericInode.father_inode = 0;
 
-    for(int i = 2; i <= inodeBlocks; i++){
+    totalInodes = inodeBlocks * inodesPerBlock;
+
+    int i;
+
+    for(i = 2; i <= totalInodes; i++){
         if(sizeof(Inode) > space){
             for(int j = 0; j < space; j++){
                 fputc(0, hd);
@@ -321,12 +354,16 @@ void writeInodeBlocks(){
         space -= sizeof(Inode);
     }
 
-    inodes = (Inode *) malloc(sizeof(Inode) * inodeBlocks);
-    fseek(hd, sizeof(SuperBlock), SEEK_SET);
-    fflush(hd);
-    fflush(stdin);
+    // cout<<"\nTotal de Inodes: "<<i - 1<<endl;
 
     // CÓDIGO PARA EXIBIR A ESTRUTURA DOS INODES GRAVADOS
+
+    // inodes = (Inode *) malloc(sizeof(Inode) * inodesPerBlock * inodeBlocks);
+    // fseek(hd, sizeof(SuperBlock), SEEK_SET);
+    // fflush(hd);
+    // fflush(stdin);
+
+    
     // for(int i = 0; i < inodeBlocks; i++){
     //     if(space < sizeof(Inode)){
     //         fseek(hd, space, SEEK_CUR);
@@ -342,6 +379,20 @@ void writeInodeBlocks(){
     // cout << numBlocks << endl;
     // FIM DA EXIBIÇÃO
 }
+
+void writeBitmapBlocks(){
+    bitmapDataBlocks.setSize(numDataBlocks);
+    fwrite(bitmapDataBlocks.bitMapArray, bitmapDataBlocks.numBlocks, 1, hd);
+
+    int space = (bitmapBlocks * sizeBlock) - numDataBlocks;
+
+    //cout<<"\nSpace Bitmap: "<<space<<endl;
+
+    for(int i = 0; i < space; i++){
+        fputc(0, hd);
+    }
+}
+
 
 int strToInt(const string str){
     int i;
@@ -376,21 +427,8 @@ void printSuperBlock(SuperBlock sp){
     printf("Num Blocks: %d\n", sp.numBlocks);
     printf("Free Blocks: %d\n", sp.numFreeBlocks);
     printf("First Inode: %d\n", sp.firstInodeBlock);
-    printf("Total Inodes: %d\n", sp.numInodeBlocks);
+    printf("Total InodeBlocks: %d\n", sp.numInodeBlocks);
     printf("First Data: %d\n", sp.firstDataBlock);
-}
-
-void writeBitmapBlocks(){
-    bitmapDataBlocks.setSize(numDataBlocks);
-    fwrite(bitmapDataBlocks.bitMapArray, bitmapDataBlocks.numBlocks, 1, hd);
-
-    int space = sizeBlock - numDataBlocks;
-
-    //cout<<"\nSpace Bitmap: "<<space<<endl;
-
-    for(int i = 0; i < space; i++){
-        fputc(0, hd);
-    }
 }
 
 // TODO: rever por inteiro
@@ -399,9 +437,14 @@ void updateHD(){
     
     fwrite(&(superBlock), sizeof(SuperBlock), 1, hd);
 
-    int space = sizeBlock;
+    int space = sizeBlock - sizeof(SuperBlock);
 
-    for(int i = 0; i < inodeBlocks; i++){
+    while(space--){
+        fputc(0, hd);
+    }
+
+    space = sizeBlock;
+    for(int i = 0; i <= totalInodes; i++){
         if(sizeof(Inode) > space){
             for(int j = 0; j < space; j++){
                 fputc(0, hd);
@@ -412,8 +455,13 @@ void updateHD(){
         space -= sizeof(Inode);
     }
 
-    //fwrite(inodes, sizeof(Inode), inodeBlocks, hd);
     fwrite(bitmapDataBlocks.bitMapArray, bitmapDataBlocks.numBlocks, 1, hd);
+
+    space = (bitmapBlocks * sizeBlock) - numDataBlocks;
+
+    for(int i = 0; i < space; i++){
+        fputc(0, hd);
+    }
 
     for(int i = 0; i < numDataBlocks; i++){
         fputs(datablocks[i], hd);
@@ -432,7 +480,7 @@ void exitHD(){
 
     free(datablocks);
 
-    cout<<"\nO HD "<<nomeHD<<" foi salvo com sucesso!"<<endl;
+    cout<<GREEN<<"\nO HD \""<<nomeHD<<"\" foi salvo com sucesso!"<<RESET<<endl;
 }
 
 void getclause(){
@@ -514,7 +562,7 @@ void typehd(){
         id++;
     }
 
-    cout<<"\nHexadecimal:"<<endl;
+    cout<<YELLOW<<"\nHexadecimal:"<<RESET<<endl;
 
     for(int i = 0; i < sizeBlock * numBlocks; i++){
         if(buffer[i] != 0)
@@ -524,7 +572,7 @@ void typehd(){
                 printf("? ");
     }
 
-    cout<<endl<<endl<<"Char:"<<endl;
+    cout<<endl<<endl<<YELLOW<<"Char:"<<RESET<<endl;
 
     for(int i = 0; i < sizeBlock * numBlocks; i++){
         if(buffer[i] != 0)
@@ -547,3 +595,20 @@ void printBitmap(char * arr){
 
     cout<<"\nTotal de Datablocks: "<<i<<endl;
 }
+
+void printDataBlocks(){
+    fflush(hd);
+    fflush(stdin);
+
+    //cout<<"\nNumDataBlocks: "<<numDataBlocks<<endl<<"SizeBlock: "<<sizeBlock<<endl;
+    //return;
+
+    for(int i = 0; i < numDataBlocks; i++){
+        for(int j = 0; j < sizeBlock; j++){
+            printf("%x ", datablocks[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+#endif

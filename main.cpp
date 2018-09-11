@@ -27,7 +27,7 @@ int main() {
 	cout<<"\nDigite a funcao que deseja executar:\n\n";
 
 	while(cmd != "exit"){
-		printf(">");
+		printf("# ");
 		getclause();
 
 		if(cmd.back() == ':'){
@@ -40,7 +40,7 @@ int main() {
 			if(cmd == "")
 				printf("");
 			else if(funcs.find(cmd.c_str()) == funcs.end())
-				cout<<"ERRO: Esta funcao nao existe...\n";
+				cout<<RED<<"ERRO: Esta funcao nao existe...\n"<<RESET;
 			else{
 				funcs[cmd]();
 				cmd = "";

@@ -12,6 +12,8 @@ extern int sizeBlock;
 extern int inodeBlocks;
 extern int bitmapBlocks;
 extern int numDataBlocks;
+extern int inodesPerBlock;
+extern int totalInodes;
 extern string numBlocks_s;
 extern string sizeBlock_s;
 extern string nomeHD;
@@ -25,5 +27,7 @@ extern char ** datablocks;
 extern Config config;
 extern Config hdList[20];
 extern Inode actualInode;
+extern string location;
+
 
 #endif
