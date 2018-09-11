@@ -172,6 +172,8 @@ void selecionaHD(){
     localMap["createdir"] = createdir;
     localMap["cd"] = cd;
     localMap["dir"] = dir;
+    localMap["remove"] = removeFile;
+    localMap["type"] = type;
 	localMap["exit"] = exitHD;
     // FIM DA ÁREA DE MAPEAMENTO
 
