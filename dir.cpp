@@ -14,6 +14,9 @@
 #include "globals.h"
 using namespace std;
 
+int size(Inode);
+char type(int);
+
 void printInode(Inode i){
     printf("Flag: %d\n", i.flag);
     printf("Type: %d\n", i.type);
@@ -25,7 +28,6 @@ void printInode(Inode i){
         printf("Block[%d]: %d\n", j, i.blocks[j]);
     }
     cout<<endl;
-    //cout << sizeof(Inode) << endl;
 }
 
 void createdir(){
@@ -56,7 +58,6 @@ void createdir(){
 
 	// Encontra 
 	for(j = 0; actualInode.blocks[j] != 0; j++){
-		//cout<<"\nConteudo do block["<<j<<"]: "<<actualInode.blocks[j]<<endl;
 		if(j > 6){
 			cout<<RED<<"\nERRO: Numero máximo de blocos de endereco utilizado..."<<RESET<<endl;
 			cout<<YELLOW<<"Hint: Apague algum arquivo/diretorio ou formate seu HD para liberar espaco!"<<RESET<<endl;
@@ -69,23 +70,11 @@ void createdir(){
 	inodes[i].type = 1;
 	inodes[i].father_inode = actualInode.number;
 	inodes[actualInode.number - 1].blocks[j] = actualInode.blocks[j] = inodes[i].number;
-	// cout<<"PAI:\n";
-	// printInode(actualInode);
-	// cout<<"Filho:\n";
-	// printInode(inodes[i]);
-
 }
 
 void cd(){
-	// cout<<"Root:"<<endl;
-	// printInode(inodes[0]);
-
-	// cout<<"Estava em: "<<endl;
-	// printInode(actualInode);
-
 	string dirname = params[0];
 	int i,j;
-	// cd inode.name 
 
 	if(dirname == ".."){
 		if(actualInode.number == 1){
@@ -98,8 +87,6 @@ void cd(){
 			location = location.substr(0, location.find(actualInode.name) - 1);
 		
 		actualInode = inodes[actualInode.father_inode - 1];
-		// cout<<"Inode Atual: "<<endl;
-		// printInode(actualInode);
 		return;
 	}
 
@@ -117,13 +104,42 @@ void cd(){
 				location += actualInode.name;
 			else 
 				location = location + "/" + actualInode.name;
-
-			// cout<<"Inode Atual"<<endl;
-			// printInode(actualInode);
 			return;
 		}
 	}
 	cout<<RED<<"ERRO: o diretorio nao existe..."<<RESET<<endl;
 }
 
+void dir(){
+	printf(YELLOW "%-26s %-5s %-4s\n" RESET, "Nome", "Tipo", "Tamanho");
+	for(int i = 0; i < 7; i++){
+		if(actualInode.blocks[i] != 0){
+			Inode child = inodes[actualInode.blocks[i] - 1];
+			printf("%-26s %2c   %4d bytes\n", child.name, type(child.type), size(child));
+		}
+	}
+}
+
+int size(Inode child){
+	// Se for um inode de diretório retorna o tamanho do Inode
+	if(child.type == 1)
+		return sizeof(Inode);
+	// Senão, é um inode de arquivo, neste caso percorre os blocks 
+	// do child que sejam diferentes de zero e soma o tamanho do datablock
+	else{
+		int size = 0;
+		for(int i = 0; i < 7; i++){
+			if(child.blocks[i] != 0)
+				size += sizeBlock;
+		}
+		return size;
+	}
+}
+
+char type(int i_type){
+	if(i_type == 1)
+		return 'D';
+	else 
+		return 'A';
+}
 #endif

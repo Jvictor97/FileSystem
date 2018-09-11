@@ -171,6 +171,7 @@ void selecionaHD(){
 	map<std::string, functions> localMap;
     localMap["createdir"] = createdir;
     localMap["cd"] = cd;
+    localMap["dir"] = dir;
 	localMap["exit"] = exitHD;
     // FIM DA ÁREA DE MAPEAMENTO
 
