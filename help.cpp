@@ -1,3 +1,5 @@
+#ifndef HELP_CPP
+#define HELP_CPP
 #include <iostream>
 #include <cstdlib>
 #include <string>
@@ -56,3 +58,5 @@ void help(){
 	 	cout<<"exit\nSair\n\n\n\n"<<endl;
   
 }
+
+#endif

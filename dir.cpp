@@ -56,7 +56,7 @@ void createdir(){
 		return;
 	}
 
-	// Encontra 
+	// Encontra bloco disponivel do Inode pai
 	for(j = 0; actualInode.blocks[j] != 0; j++){
 		if(j > 6){
 			cout<<RED<<"\nERRO: Numero máximo de blocos de endereco utilizado..."<<RESET<<endl;
@@ -100,6 +100,8 @@ void cd(){
 			Inode prevInode = actualInode;
 			actualInode = inodes[actualInode.blocks[i] - 1];
 
+			printInode(actualInode);
+			
 			if(prevInode.number == 1)
 				location += actualInode.name;
 			else 

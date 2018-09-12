@@ -26,7 +26,6 @@ This file is related to the functions and attributes of the virtual HD
 #include "superblock.cpp"
 #include "config.cpp"
 #include "bitmapDataBlocks.cpp"
-
 // Header para declaração de variaveis globais
 #include "globals.h"
 
@@ -35,6 +34,8 @@ This file is related to the functions and attributes of the virtual HD
 
 // Classe para manipulação de diretórios
 #include "dir.cpp"
+
+#include "help.cpp"
 
 using namespace std;
 
@@ -178,6 +179,7 @@ void selecionaHD(){
     localMap["create"] = create;
     localMap["remove"] = removeFile;
     localMap["type"] = type;
+    localMap["help"] = help;
 	localMap["exit"] = exitHD;
     // FIM DA ÁREA DE MAPEAMENTO
 

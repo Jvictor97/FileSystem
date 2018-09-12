@@ -24,6 +24,19 @@ void create(){
 
     string fileName = params[0];
 
+    int aux;
+    for(aux = 0; aux < totalInodes; aux++){
+        if(inodes[aux].type == 2
+            && inodes[aux].name == fileName 
+            && inodes[aux].father_inode == actualInode.number)
+        {
+            cout << RED << "ERRO: O arquivo \"" << YELLOW << fileName << RED << "\"" << " ja existe neste diretorio" << endl;
+            return;
+        }
+    }
+
+    
+
     string content;
     getline(cin, content);
     
@@ -31,6 +44,7 @@ void create(){
         cout<<RED<<"O arquivo é muito grande" << endl;
         return;
     }
+
 
     int i;
 
@@ -101,21 +115,48 @@ void removeFile(){
 	}
 
 	cout<<RED<<"ERRO: nenhum arquivo com o nome \""<<YELLOW<<filename<<RED<<"\" neste caminho.\n";
-}
+}                                                   
 
+
+//TODO: Validar o conteúdo de arquivos de mesmo nome em outro nível de diretorio
 void type(){
 	string filename = params[0];
     fflush(stdin);
 
-	for(int i = 0; i < 7; i++){
-		if(actualInode.blocks[i] != 0){
-			Inode child = inodes[actualInode.blocks[i] - 1];
+	// for(int i = 0; i < 7; i++){
+	// 	if(actualInode.blocks[i] != 0){
+	// 		Inode child = inodes[actualInode.blocks[i] - 1];
 			
-			if(child.type == 2 // Se for um inode de arquivo
-			&& child.flag == 1 // Ativo
-			&& child.name == filename){ // Cujo nome seja o filename
+	// 		if(child.type == 2 // Se for um inode de arquivo
+	// 		&& child.flag == 1 // Ativo
+	// 		&& child.name == filename // Cujo nome seja o filename
+    //         && child.father_inode == actualInode.number // E esta no diretorio atual
+    //         ){ 
+	// 			for(int j = 0; j < 7; j++){
+	// 				if(child.blocks[j] != 0){
+    //                     for(int p = 0; p < sizeBlock; p++){
+	// 					    printf(MAGENTA "%c" RESET, datablocks[j][p]);
+    //                     }
+    //                     printf("\n");
+	// 				}
+	// 			}
+	// 			return;
+	// 		}
+	// 	}
+	// }
+
+    for(int i = 0; i < totalInodes; i++){
+		// if(actualInode.blocks[i] != 0){
+		// 	Inode child = inodes[actualInode.blocks[i] - 1];
+			
+			if(inodes[i].type == 2 // Se for um inode de arquivo
+			&& inodes[i].flag == 1 // Ativo
+			&& inodes[i].name == filename // Cujo nome seja o filename
+            && inodes[i].father_inode == actualInode.number // E esta no diretorio atual
+            ){
+                printInod(inodes[i]); 
 				for(int j = 0; j < 7; j++){
-					if(child.blocks[j] != 0){
+					if(inodes[i].blocks[j] != 0){
                         for(int p = 0; p < sizeBlock; p++){
 						    printf(MAGENTA "%c" RESET, datablocks[j][p]);
                         }
@@ -124,9 +165,7 @@ void type(){
 				}
 				return;
 			}
-		}
-	}
-
+    }
 	cout<<RED<<"ERRO: nenhum arquivo com o nome \""<<YELLOW<<filename<<RED<<"\" neste caminho.\n";
 }
 
