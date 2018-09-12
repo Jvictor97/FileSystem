@@ -212,11 +212,11 @@ void selecionaHD(){
 
     for(int i = 0; i < totalInodes; i++){
         if(space < sizeof(Inode)){
-            cout<<"Posicao: "<<ftell(hd);
             fseek(hd, space, SEEK_CUR);
             space = sizeBlock;
         }
         fread(&inodes[i], sizeof(Inode), 1, hd);
+        //printInodes(inodes[i]);
         space-=sizeof(Inode);
     }
 
@@ -438,7 +438,7 @@ void printSuperBlock(SuperBlock sp){
 
 // TODO: rever por inteiro
 void updateHD(){
-    hd = fopen(nomeHD.c_str(), "w+");
+    hd = fopen(nomeHD.c_str(), "w");
     
     fwrite(&(superBlock), sizeof(SuperBlock), 1, hd);
 
@@ -448,28 +448,43 @@ void updateHD(){
         fputc(0, hd);
     }
 
+    fflush(hd);
     space = sizeBlock;
-    for(int i = 0; i <= totalInodes; i++){
-        if(sizeof(Inode) > space){
-            for(int j = 0; j < space; j++){
-                fputc(0, hd);
-            }
+    for(int i = 0; i < totalInodes; i++){
+        if(space == 0)
             space = sizeBlock;
-        }
+        else
+            if(sizeof(Inode) > space){
+                for(int j = 0; j < space; j++){
+                    fputc(0, hd);
+                }
+                space = sizeBlock;
+            }
         fwrite(&inodes[i], sizeof(Inode), 1, hd);
         space -= sizeof(Inode);
     }
 
-    fwrite(bitmapDataBlocks.bitMapArray, bitmapDataBlocks.numBlocks, 1, hd);
+    fflush(hd);
+    fflush(stdin);
+    fseek(hd, 0, SEEK_CUR);
+
+    printBitmap(bitmapDataBlocks.bitMapArray);
+    fwrite(bitmapDataBlocks.bitMapArray, sizeof(char), bitmapDataBlocks.numBlocks, hd);
 
     space = (bitmapBlocks * sizeBlock) - numDataBlocks;
+    // cout<<"Numblocks Bitmap: "<<bitmapDataBlocks.numBlocks;
 
-    for(int i = 0; i < space; i++){
+    fflush(hd);
+    fflush(stdin);
+    fseek(hd, 0, SEEK_CUR);
+    while(space--){
         fputc(0, hd);
     }
 
     for(int i = 0; i < numDataBlocks; i++){
-        fputs(datablocks[i], hd);
+        for(int j = 0; j < sizeBlock; j++){
+            fwrite(&datablocks[i][j], sizeof(char), 1, hd);
+        }
     }
     fclose(hd);
 }
@@ -590,13 +605,14 @@ void typehd(){
 
     cout<<endl;
 
+    fclose(hd);
     free(buffer);
 }
 
 void printBitmap(char * arr){
     int i;
     for(i = 0; i < numDataBlocks; i++){
-        printf("%d ", arr[0]);
+        printf("%d ", arr[i]);
     }
 
     cout<<"\nTotal de Datablocks: "<<i<<endl;
