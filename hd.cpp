@@ -281,7 +281,7 @@ void selecionaHD(){
 void exit(){
 	if(hd != NULL)
 		fclose(hd);
-	return;
+	exit(0);
 }
 
 void writeSuperBlock(){
