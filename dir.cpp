@@ -66,8 +66,8 @@ void createdir(){
 	}
 
 	inodes[i].flag = 1;
-	strncpy(inodes[i].name, name.c_str(), sizeof(Inode::name));
 	inodes[i].type = 1;
+	strncpy(inodes[i].name, name.c_str(), sizeof(Inode::name));
 	inodes[i].father_inode = actualInode.number;
 	inodes[actualInode.number - 1].blocks[j] = actualInode.blocks[j] = inodes[i].number;
 }
