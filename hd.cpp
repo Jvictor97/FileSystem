@@ -61,6 +61,7 @@ Config config;
 Config hdList[20];
 Inode actualInode;
 string location;
+bool formatado = false;
 
 typedef void (*functions)(void); // function pointer type
 
@@ -150,18 +151,20 @@ void createhd()
         }
         fclose(hd); 
 
-        string shortHdName = nomeHD.substr(0, nomeHD.find(".mvpfs"));
 
-        strncpy(config.nomeHD, shortHdName.c_str(), sizeof(Config::nomeHD));
-        config.blockSize = sizeBlock;
-        config.numBlocks = numBlocks;
-        
-        configFile = fopen(".config", "a"); // Abre ou cria o arquivo config
+        if(!formatado){
+            string shortHdName = nomeHD.substr(0, nomeHD.find(".mvpfs"));
 
-        fwrite(&config, sizeof(Config), 1, configFile);
-        fclose(configFile);
+            strncpy(config.nomeHD, shortHdName.c_str(), sizeof(Config::nomeHD));
+            config.blockSize = sizeBlock;
+            config.numBlocks = numBlocks;
+            
+            configFile = fopen(".config", "a"); // Abre ou cria o arquivo config
 
-
+            fwrite(&config, sizeof(Config), 1, configFile);
+            fclose(configFile);
+            formatado = false;
+        }
         return;
     }
 }
@@ -551,6 +554,7 @@ void formathd(){
     sizeBlock_s = to_string(superBlock.numBlocks);
     params[2] = sizeBlock_s;
 
+    formatado = true;
     createhd();
 }
 
