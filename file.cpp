@@ -6,6 +6,19 @@
 
 using namespace std;
 
+void printInod(Inode i){
+    printf("Flag: %d\n", i.flag);
+    printf("Type: %d\n", i.type);
+    printf("Number: %d\n", i.number);
+    printf("Father: %d\n", i.father_inode);
+    printf("Name: %s\n", i.name);
+
+    for(int j = 0; j < 7; j++){
+        printf("Block[%d]: %d\n", j, i.blocks[j]);
+    }
+    cout<<endl;
+}
+
 void create(){
 
     string fileName = params[0];
@@ -15,6 +28,7 @@ void create(){
     string content;
     getline(cin, content);
     
+    cout << "AQUIII::" << content << endl;
     if(content.size() > (sizeBlock * 7)){
         cout<<RED<<"O arquivo é muito grande" << endl;
         return;
@@ -25,13 +39,30 @@ void create(){
     // Encontra o proximo Inode disponivel
     for(i = 0; i < totalInodes && inodes[i].flag != 0; i++);
 
-    int amtBlocks = ceil(content.size() / sizeBlock);
+
+    cout << "Content Size: " << content.size() << endl;
+    cout << "sizeBlock: " << sizeBlock << endl;
+    
+    int amtBlocks = ceil((double)content.size() / (double)sizeBlock);
+
+    cout << "amountBlocks: " << amtBlocks << endl;
 
     inodes[i].flag = 1;
     inodes[i].type = 2;
     strncpy(inodes[i].name, fileName.c_str(), sizeof(Inode::name));
     inodes[i].father_inode = actualInode.number;    
-    
+
+    int actual;
+	for(actual = 0; actualInode.blocks[actual] != 0; actual++){
+		if(actual > 6){
+			cout<<RED<<"\nERRO: Numero máximo de blocos de endereco utilizado..."<<RESET<<endl;
+			cout<<YELLOW<<"Hint: Apague algum arquivo/diretorio ou formate seu HD para liberar espaco!"<<RESET<<endl;
+			return;
+		}
+	}
+
+    inodes[actualInode.number - 1].blocks[actual] = actualInode.blocks[actual] = inodes[i].number;
+
     int j, k;
 
     // Encontra o proximo DataBlock disponivel
@@ -45,7 +76,11 @@ void create(){
         strncpy(datablocks[inodes[i].blocks[j] - superBlock.firstDataBlock], content.substr(0,sizeBlock).c_str(), sizeBlock);
         content = content.substr(sizeBlock, content.size());
     }
+
+     printInod(inodes[i]);
 }
+
+
 void removeFile(){
 	string filename = params[0];
 
