@@ -234,7 +234,7 @@ void selecionaHD(){
     // Calcula o número de datablocks
     numDataBlocks = numBlocks - 1 - inodeBlocks - bitmapBlocks;
     // Inicializa a variável global de bitmap
-    bitmapDataBlocks.setSize(numBlocks);
+    bitmapDataBlocks.setSize(numDataBlocks);
 
     // Lê do arquivo para a variável o bitmap
     fread(bitmapDataBlocks.bitMapArray, sizeof(bool), numDataBlocks, hd); 

@@ -2,6 +2,7 @@
 #define FILE_CPP
 
 #include <iostream>
+#include <string>
 #include "globals.h"
 
 using namespace std;
@@ -23,12 +24,9 @@ void create(){
 
     string fileName = params[0];
 
-    //char buffer[blockSize * 7];
-    
     string content;
     getline(cin, content);
     
-    cout << "AQUIII::" << content << endl;
     if(content.size() > (sizeBlock * 7)){
         cout<<RED<<"O arquivo é muito grande" << endl;
         return;
@@ -39,18 +37,13 @@ void create(){
     // Encontra o proximo Inode disponivel
     for(i = 0; i < totalInodes && inodes[i].flag != 0; i++);
 
-
-    cout << "Content Size: " << content.size() << endl;
-    cout << "sizeBlock: " << sizeBlock << endl;
-    
+    //TODO: diminuir a quantia de blocos livres no superblock em amtBlocks
     int amtBlocks = ceil((double)content.size() / (double)sizeBlock);
-
-    cout << "amountBlocks: " << amtBlocks << endl;
 
     inodes[i].flag = 1;
     inodes[i].type = 2;
     strncpy(inodes[i].name, fileName.c_str(), sizeof(Inode::name));
-    inodes[i].father_inode = actualInode.number;    
+    inodes[i].father_inode = actualInode.number;
 
     int actual;
 	for(actual = 0; actualInode.blocks[actual] != 0; actual++){
@@ -70,14 +63,13 @@ void create(){
         for(k = 0; bitmapDataBlocks.bitMapArray[k] && k < numDataBlocks; k++);
         bitmapDataBlocks.bitMapArray[k] = 1;
         inodes[i].blocks[j] = k + superBlock.firstDataBlock;
-   }
+    }
 
     for(j = 0; j < amtBlocks; j++){
         strncpy(datablocks[inodes[i].blocks[j] - superBlock.firstDataBlock], content.substr(0,sizeBlock).c_str(), sizeBlock);
-        content = content.substr(sizeBlock, content.size());
+        if(content.size() > sizeBlock)
+            content = content.substr(sizeBlock);
     }
-
-     printInod(inodes[i]);
 }
 
 
@@ -93,8 +85,12 @@ void removeFile(){
 			&& child.name == filename){
 				for(int j = 0; j < 7; j++){
 					if(child.blocks[j] != 0){
-						strncpy(datablocks[child.blocks[j] - superBlock.firstDataBlock], 0, sizeBlock);
+                        for(int b = 0; b < sizeBlock; b++){
+                            datablocks[child.blocks[j] - superBlock.firstDataBlock][b] = 0;
+                        }
 						bitmapDataBlocks.bitMapArray[child.blocks[j] - superBlock.firstDataBlock] = 0;
+                        actualInode.blocks[i] = 0;
+                        printInod(actualInode);
 					}
 				}
 				inodes[child.number - 1].initialize();
@@ -109,6 +105,7 @@ void removeFile(){
 
 void type(){
 	string filename = params[0];
+    fflush(stdin);
 
 	for(int i = 0; i < 7; i++){
 		if(actualInode.blocks[i] != 0){
@@ -122,7 +119,6 @@ void type(){
 						printf(MAGENTA "%s\n" RESET, datablocks[j]);
 					}
 				}
-				cout<<endl;
 				return;
 			}
 		}
