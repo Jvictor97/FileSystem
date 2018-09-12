@@ -142,4 +142,5 @@ char type(int i_type){
 	else 
 		return 'A';
 }
+
 #endif

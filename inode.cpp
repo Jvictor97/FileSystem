@@ -2,6 +2,11 @@ struct Inode{
 
 public:
     Inode(){
+        number = 0;
+        initialize();
+    }
+
+    void initialize(){
         flag = 0;
 
         for(int i = 0; i < 26; i++){
@@ -9,7 +14,6 @@ public:
         }
 
         type = 0;
-        number = 0;
         father_inode = 0;
 
         for(int i = 0; i < 7; i++){

@@ -173,6 +173,8 @@ void selecionaHD(){
     localMap["cd"] = cd;
     localMap["dir"] = dir;
     localMap["create"] = create;
+    localMap["remove"] = removeFile;
+    localMap["type"] = type;
 	localMap["exit"] = exitHD;
     // FIM DA ÁREA DE MAPEAMENTO
 
@@ -280,7 +282,7 @@ void selecionaHD(){
 void exit(){
 	if(hd != NULL)
 		fclose(hd);
-	return;
+	exit(0);
 }
 
 void writeSuperBlock(){
