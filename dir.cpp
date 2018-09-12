@@ -112,9 +112,11 @@ void cd(){
 
 void dir(){
 	printf(YELLOW "%-26s %-5s %-4s\n" RESET, "Nome", "Tipo", "Tamanho");
+	//printInode(actualInode);
 	for(int i = 0; i < 7; i++){
 		if(actualInode.blocks[i] != 0){
 			Inode child = inodes[actualInode.blocks[i] - 1];
+			//printInode(child);
 			printf("%-26s %2c   %4d bytes\n", child.name, type(child.type), size(child));
 		}
 	}

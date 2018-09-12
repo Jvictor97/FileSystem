@@ -89,12 +89,12 @@ void removeFile(){
                             datablocks[child.blocks[j] - superBlock.firstDataBlock][b] = 0;
                         }
 						bitmapDataBlocks.bitMapArray[child.blocks[j] - superBlock.firstDataBlock] = 0;
-                        actualInode.blocks[i] = 0;
-                        printInod(actualInode);
+                        inodes[actualInode.number - 1].blocks[i] = actualInode.blocks[i] = 0;
+                        //printInod(actualInode);
 					}
 				}
 				inodes[child.number - 1].initialize();
-				cout<<GREEN<<"\nArquivo \""<<YELLOW<<filename<<GREEN<<"\" removido com sucesso!\n";
+				cout<<GREEN<<"\nArquivo \""<<YELLOW<<filename<<GREEN<<"\" removido com sucesso!\n\n";
 				return;
 			}
 		}
@@ -116,7 +116,10 @@ void type(){
 			&& child.name == filename){ // Cujo nome seja o filename
 				for(int j = 0; j < 7; j++){
 					if(child.blocks[j] != 0){
-						printf(MAGENTA "%s\n" RESET, datablocks[j]);
+                        for(int p = 0; p < sizeBlock; p++){
+						    printf(MAGENTA "%c" RESET, datablocks[j][p]);
+                        }
+                        printf("\n");
 					}
 				}
 				return;

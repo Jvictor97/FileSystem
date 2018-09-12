@@ -468,7 +468,7 @@ void updateHD(){
     fflush(stdin);
     fseek(hd, 0, SEEK_CUR);
 
-    printBitmap(bitmapDataBlocks.bitMapArray);
+    //printBitmap(bitmapDataBlocks.bitMapArray);
     fwrite(bitmapDataBlocks.bitMapArray, sizeof(char), bitmapDataBlocks.numBlocks, hd);
 
     space = (bitmapBlocks * sizeBlock) - numDataBlocks;
@@ -500,7 +500,7 @@ void exitHD(){
 
     free(datablocks);
 
-    cout<<GREEN<<"\nO HD \""<<nomeHD<<"\" foi salvo com sucesso!"<<RESET<<endl;
+    cout<<GREEN<<"\nO HD \""<<nomeHD<<"\" foi salvo com sucesso!"<<RESET<<endl<<endl;
 }
 
 void getclause(){
