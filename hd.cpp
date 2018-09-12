@@ -212,6 +212,7 @@ void selecionaHD(){
 
     for(int i = 0; i < totalInodes; i++){
         if(space < sizeof(Inode)){
+            cout<<"Posicao: "<<ftell(hd);
             fseek(hd, space, SEEK_CUR);
             space = sizeBlock;
         }
@@ -546,6 +547,7 @@ void typehd(){
     fflush(stdin);
     fseek(configFile, 0, SEEK_SET);
     fread(hdList, sizeof(Config), 20, configFile);
+    fclose(configFile);
 
     int x;
     for(x = 0; hdList[x].nomeHD != params[0]; x++);
