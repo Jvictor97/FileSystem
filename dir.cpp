@@ -99,8 +99,6 @@ void cd(){
 		{
 			Inode prevInode = actualInode;
 			actualInode = inodes[actualInode.blocks[i] - 1];
-
-			printInode(actualInode);
 			
 			if(prevInode.number == 1)
 				location += actualInode.name;

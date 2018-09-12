@@ -84,6 +84,7 @@ void create(){
         if(content.size() > sizeBlock)
             content = content.substr(sizeBlock);
     }
+
 }
 
 
@@ -123,49 +124,28 @@ void type(){
 	string filename = params[0];
     fflush(stdin);
 
-	// for(int i = 0; i < 7; i++){
-	// 	if(actualInode.blocks[i] != 0){
-	// 		Inode child = inodes[actualInode.blocks[i] - 1];
+	for(int i = 0; i < 7; i++){
+		if(actualInode.blocks[i] != 0){
+			Inode child = inodes[actualInode.blocks[i] - 1];
 			
-	// 		if(child.type == 2 // Se for um inode de arquivo
-	// 		&& child.flag == 1 // Ativo
-	// 		&& child.name == filename // Cujo nome seja o filename
-    //         && child.father_inode == actualInode.number // E esta no diretorio atual
-    //         ){ 
-	// 			for(int j = 0; j < 7; j++){
-	// 				if(child.blocks[j] != 0){
-    //                     for(int p = 0; p < sizeBlock; p++){
-	// 					    printf(MAGENTA "%c" RESET, datablocks[j][p]);
-    //                     }
-    //                     printf("\n");
-	// 				}
-	// 			}
-	// 			return;
-	// 		}
-	// 	}
-	// }
-
-    for(int i = 0; i < totalInodes; i++){
-		// if(actualInode.blocks[i] != 0){
-		// 	Inode child = inodes[actualInode.blocks[i] - 1];
-			
-			if(inodes[i].type == 2 // Se for um inode de arquivo
-			&& inodes[i].flag == 1 // Ativo
-			&& inodes[i].name == filename // Cujo nome seja o filename
-            && inodes[i].father_inode == actualInode.number // E esta no diretorio atual
-            ){
-                printInod(inodes[i]); 
+			if(child.type == 2 // Se for um inode de arquivo
+			&& child.flag == 1 // Ativo
+			&& child.name == filename // Cujo nome seja o filename
+            && child.father_inode == actualInode.number // E esta no diretorio atual
+            ){ 
 				for(int j = 0; j < 7; j++){
-					if(inodes[i].blocks[j] != 0){
+					if(child.blocks[j] != 0){
                         for(int p = 0; p < sizeBlock; p++){
-						    printf(MAGENTA "%c" RESET, datablocks[j][p]);
+						    printf(MAGENTA "%c" RESET, datablocks[child.blocks[j] - superBlock.firstDataBlock][p]);
                         }
                         printf("\n");
 					}
 				}
 				return;
 			}
-    }
+		}
+	}
+
 	cout<<RED<<"ERRO: nenhum arquivo com o nome \""<<YELLOW<<filename<<RED<<"\" neste caminho.\n";
 }
 
