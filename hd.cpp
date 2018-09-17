@@ -193,8 +193,8 @@ void selecionaHD(){
     fread(&superBlock, sizeof(SuperBlock), 1, hd);
 
     // REMOVER PRINT SUPERBLOCK
-    // cout<<"\nSuperBlock: "<<endl;
-    // printSuperBlock(superBlock);
+    cout<<"\nSuperBlock: "<<endl;
+    printSuperBlock(superBlock);
 
     numBlocks = superBlock.numBlocks;
     sizeBlock = superBlock.blockSize;
@@ -576,42 +576,67 @@ void typehd(){
     sizeBlock = hdList[x].blockSize;
     numBlocks = hdList[x].numBlocks;
 
-    char * buffer = (char *) malloc(sizeof(char) * sizeBlock * numBlocks);
+    hd = fopen(nomeHD.c_str(), "rb+");
 
-    hd = fopen(nomeHD.c_str(), "r");
+    char ** buffer = (char **) malloc(sizeof(char*) * numBlocks);
+
+    for(int i = 0; i < numBlocks; i++){
+        buffer[i] = (char *) malloc(sizeof(char) * sizeBlock);
+        fread(buffer[i], sizeBlock, 1, hd);
+    }
+
     fflush(stdin);
     fflush(hd);
     fseek(hd, 0, SEEK_SET);
 
-    int id = 0;
-    while(id < sizeBlock * numBlocks){
-        fread(&buffer[id], sizeof(char), 1, hd);
-        id++;
+    //cout<<"Blocos: "<<numBlocks<<endl<<"size: "<<sizeBlock<<endl;
+
+    bool printChar = false, printedAny = false;
+    
+    for(int i = 0; i < numBlocks; i++){
+        if(!printChar)
+            printf(YELLOW "%04d  " RESET, i);
+        else
+            printf("      ");
+        for(int j = 0; j < sizeBlock; j++){
+            if(buffer[i][j] != 0){
+                printedAny = true;
+                if(buffer[i][j] > 32 && buffer[i][j] < 126){
+                    if(printChar)
+                        printf("%-3c", buffer[i][j]);
+                    else
+                        printf("%-3x", buffer[i][j]);  
+                }else
+                    printf("%-3c", '?');
+            }
+            if(j == sizeBlock - 1){
+                if(printedAny){
+                    printf("\n");
+                    printedAny = false;
+                    if(!printChar){
+                        i -= 1;
+                        printChar = true;
+                    }
+                    else{
+                        printChar = false;
+                    }
+                }
+                else
+                    if(i == numBlocks - 1)
+                        printf("\r    ");
+                    else 
+                        printf("\r");
+            }
+        }
     }
-
-    cout<<YELLOW<<"\nHexadecimal:"<<RESET<<endl;
-
-    for(int i = 0; i < sizeBlock * numBlocks; i++){
-        if(buffer[i] != 0)
-            if(buffer[i] > 32 && buffer[i] < 126)
-                printf("%x ", buffer[i]);
-            else
-                printf("? ");
-    }
-
-    cout<<endl<<endl<<YELLOW<<"Char:"<<RESET<<endl;
-
-    for(int i = 0; i < sizeBlock * numBlocks; i++){
-        if(buffer[i] != 0)
-            if(buffer[i] > 32 && buffer[i] < 126)
-                printf("%c ", buffer[i]);
-           else
-                printf("? ");
-    }
-
     cout<<endl;
 
     fclose(hd);
+
+    for(int i = 0; i < numBlocks; i++){
+        free(buffer[i]);
+    }
+
     free(buffer);
 }
 
