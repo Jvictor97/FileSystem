@@ -23,6 +23,8 @@ int main() {
 	funcs["help"] = help;
 	funcs["?"] = help;
 
+	system("clear");
+
 	cout<<"\n* Seja bem vindo ao MVPFS *";
 	cout<<"\nDigite a funcao que deseja executar:\n\n";
 

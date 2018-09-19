@@ -561,7 +561,7 @@ void formathd(){
 }
 
 void typehd(){
-
+    int linhasPrintadas = 0;
     nomeHD = params[0] + ".mvpfs";
     configFile = fopen(".config", "r");
     fflush(hd);
@@ -602,15 +602,20 @@ void typehd(){
             if(buffer[i][j] != 0){
                 printedAny = true;
                 if(buffer[i][j] > 32 && buffer[i][j] < 126){
-                    if(printChar)
+                    if(printChar){
                         printf("%-3c", buffer[i][j]);
-                    else
+                    }
+                    else{
                         printf("%-3x", buffer[i][j]);  
-                }else
+                    }
+                        
+                }else{
                     printf("%-3c", '?');
+                }    
             }
             if(j == sizeBlock - 1){
                 if(printedAny){
+                    linhasPrintadas++;
                     printf("\n");
                     printedAny = false;
                     if(!printChar){
@@ -619,6 +624,11 @@ void typehd(){
                     }
                     else{
                         printChar = false;
+                    }
+
+                    if(linhasPrintadas % 30 == 0){
+                        string auxiliar;
+                        getline(cin, auxiliar);
                     }
                 }
                 else
