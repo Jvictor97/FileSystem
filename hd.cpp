@@ -193,8 +193,8 @@ void selecionaHD(){
     fread(&superBlock, sizeof(SuperBlock), 1, hd);
 
     // REMOVER PRINT SUPERBLOCK
-    cout<<"\nSuperBlock: "<<endl;
-    printSuperBlock(superBlock);
+    //cout<<"\nSuperBlock: "<<endl;
+    // printSuperBlock(superBlock);
 
     numBlocks = superBlock.numBlocks;
     sizeBlock = superBlock.blockSize;
@@ -530,6 +530,12 @@ void getclause(){
 
 void dirhd(){
     configFile = fopen(".config", "r");
+
+    if(configFile == NULL){
+        cout<<RED<<"\nERRO: nao foi identificado um arquivo .config"<<endl;
+        cout<<YELLOW<<"Dica: crie um HD com o comando 'createhd' primeiro!\n\n"<<RESET;
+        return;
+    }
 
     fread(hdList, sizeof(Config), 20, configFile);
 

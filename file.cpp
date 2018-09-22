@@ -63,7 +63,7 @@ void create(){
 	for(actual = 0; actualInode.blocks[actual] != 0; actual++){
 		if(actual > 6){
 			cout<<RED<<"\nERRO: Numero máximo de blocos de endereco utilizado..."<<RESET<<endl;
-			cout<<YELLOW<<"Hint: Apague algum arquivo/diretorio ou formate seu HD para liberar espaco!"<<RESET<<endl;
+			cout<<YELLOW<<"Dica: Apague algum arquivo/diretorio ou formate seu HD para liberar espaco!"<<RESET<<endl;
 			return;
 		}
 	}

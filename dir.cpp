@@ -52,7 +52,7 @@ void createdir(){
 	// Caso todos os inodes estejam preenchidos imprime a mensagem de erro e sai da função
 	if(i == totalInodes){
 		cout<<RED<<"\nERRO: Numero máximo de inodes utilizado..."<<RESET<<endl;
-		cout<<YELLOW<<"Hint: Apague algum arquivo/diretorio ou formate seu HD para liberar espaco!"<<RESET<<endl;
+		cout<<YELLOW<<"Dica: Apague algum arquivo/diretorio ou formate seu HD para liberar espaco!"<<RESET<<endl;
 		return;
 	}
 
@@ -60,7 +60,7 @@ void createdir(){
 	for(j = 0; actualInode.blocks[j] != 0; j++){
 		if(j > 6){
 			cout<<RED<<"\nERRO: Numero máximo de blocos de endereco utilizado..."<<RESET<<endl;
-			cout<<YELLOW<<"Hint: Apague algum arquivo/diretorio ou formate seu HD para liberar espaco!"<<RESET<<endl;
+			cout<<YELLOW<<"Dica: Apague algum arquivo/diretorio ou formate seu HD para liberar espaco!"<<RESET<<endl;
 			return;
 		}
 	}
