@@ -15,6 +15,7 @@ void getclause();
 
 int main() {
 	map<std::string, functions> funcs;
+	// Entrega 1:
 	funcs["createhd"] = createhd;
 	funcs["formathd"] = formathd;
 	funcs["dirhd"] = dirhd;
@@ -22,6 +23,9 @@ int main() {
 	funcs["exit"] = exit;
 	funcs["help"] = help;
 	funcs["?"] = help;
+
+	// Entrega 2:
+	funcs["removehd"] = removehd;
 
 	system("clear");
 

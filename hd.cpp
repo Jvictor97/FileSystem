@@ -684,4 +684,41 @@ void printDataBlocks(){
     }
 }
 
+void removehd(){
+    nomeHD = params[0];
+
+    configFile = fopen(".config", "r");
+
+    if(configFile == NULL){
+        cout<<RED<<"\nERRO: nao encontrado arquivo .config, caso algum HD exista o sistema esta corrompido!\n\n"<<RESET;
+        return;
+    }
+
+    fread(hdList, sizeof(Config), 20, configFile);
+    fclose(configFile);
+
+    int i;
+    for(i = 0; i < 20 && hdList[i].nomeHD != nomeHD; i++);
+
+    if(hdList[i].nomeHD != nomeHD){
+        cout<<RED<<"\nERRO: nenhum HD encontrado com o nome \""<<YELLOW<<nomeHD<<RED<<"\".\n\n"<<RESET;
+        return;
+    }
+
+    for(int j = i; j < 19; j++){
+        hdList[j] = hdList[j + 1];
+    }
+
+    configFile = fopen(".config", "w");
+    fwrite(hdList, sizeof(Config), 20, configFile);
+
+    string simpleHDname = nomeHD;
+
+    nomeHD += ".mvpfs";
+
+    remove(nomeHD.c_str());
+
+    cout<<GREEN<<"\nO HD \""<<YELLOW<<simpleHDname<<GREEN<<"\" foi removido com sucesso!\n\n"<<RESET;
+}
+
 #endif

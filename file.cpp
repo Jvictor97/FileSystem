@@ -85,12 +85,14 @@ void create(){
         if(content.size() > sizeBlock)
             content = content.substr(sizeBlock);
     }
-
+    // Atualiza o superblock com o número de blocos livres
+    superBlock.numFreeBlocks -= amtBlocks;
 }
 
 
 void removeFile(){
 	string filename = params[0];
+    int amtBlocks = 0;
 
 	for(int i = 0; i < 7; i++){
 		if(actualInode.blocks[i] != 0){
@@ -101,6 +103,7 @@ void removeFile(){
 			&& child.name == filename){
 				for(int j = 0; j < 7; j++){
 					if(child.blocks[j] != 0){
+                        amtBlocks++;
                         for(int b = 0; b < sizeBlock; b++){
                             datablocks[child.blocks[j] - superBlock.firstDataBlock][b] = 0;
                         }
@@ -109,6 +112,7 @@ void removeFile(){
                         //printInod(actualInode);
 					}
 				}
+                superBlock.numFreeBlocks += amtBlocks;
 				inodes[child.number - 1].initialize();
 				cout<<GREEN<<"\nArquivo \""<<YELLOW<<filename<<GREEN<<"\" removido com sucesso!\n\n";
 				return;
