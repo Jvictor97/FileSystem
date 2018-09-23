@@ -173,14 +173,18 @@ void createhd()
 void selecionaHD(){
     // ÁREA DE MAPEAMENTO DE FUNÇÕES DE ESCOPO DO HD
 	map<std::string, functions> localMap;
+    // Entrega 1:
     localMap["createdir"] = createdir;
     localMap["cd"] = cd;
     localMap["dir"] = dir;
     localMap["create"] = create;
     localMap["remove"] = removeFile;
     localMap["type"] = type;
-    localMap["help"] = help;
 	localMap["exit"] = exitHD;
+
+    // Entrega 2:
+    localMap["rename"] = rename;
+    localMap["help"] = help;
     // FIM DA ÁREA DE MAPEAMENTO
 
     hd = fopen(nomeHD.c_str(), "r+");

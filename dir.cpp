@@ -41,7 +41,7 @@ void createdir(){
 		&& inodes[actualInode.blocks[a] - 1].type == 1 
 		&& inodes[actualInode.blocks[a] - 1].name == name
 		&& inodes[actualInode.blocks[a] - 1].father_inode == actualInode.number){
-			cout<<RED<<"ERRO: este caminho ja contem um diretorio com o nome \""<<YELLOW<<name<<RED<<"\"."<<endl;
+			cout<<RED<<"\nERRO: este caminho ja contem um diretorio com o nome \""<<YELLOW<<name<<RED<<"\".\n\n";
 			return;
 		}
 	}
@@ -52,7 +52,7 @@ void createdir(){
 	// Caso todos os inodes estejam preenchidos imprime a mensagem de erro e sai da função
 	if(i == totalInodes){
 		cout<<RED<<"\nERRO: Numero máximo de inodes utilizado..."<<RESET<<endl;
-		cout<<YELLOW<<"Dica: Apague algum arquivo/diretorio ou formate seu HD para liberar espaco!"<<RESET<<endl;
+		cout<<YELLOW<<"Dica: Apague algum arquivo/diretorio ou formate seu HD para liberar espaco!\n\n"<<RESET;
 		return;
 	}
 
@@ -60,7 +60,7 @@ void createdir(){
 	for(j = 0; actualInode.blocks[j] != 0; j++){
 		if(j > 6){
 			cout<<RED<<"\nERRO: Numero máximo de blocos de endereco utilizado..."<<RESET<<endl;
-			cout<<YELLOW<<"Dica: Apague algum arquivo/diretorio ou formate seu HD para liberar espaco!"<<RESET<<endl;
+			cout<<YELLOW<<"Dica: Apague algum arquivo/diretorio ou formate seu HD para liberar espaco!\n\n"<<RESET;
 			return;
 		}
 	}
@@ -78,7 +78,7 @@ void cd(){
 
 	if(dirname == ".."){
 		if(actualInode.number == 1){
-			cout<<RED<<"ERRO: voce ja esta no root!!!"<<RESET<<endl;
+			cout<<RED<<"\nERRO: voce ja esta no root!!!\n\n"<<RESET;
 			return;
 		}
 		if(inodes[actualInode.father_inode - 1].number == 1)
@@ -107,7 +107,7 @@ void cd(){
 			return;
 		}
 	}
-	cout<<RED<<"ERRO: o diretorio nao existe..."<<RESET<<endl;
+	cout<<RED<<"\nERRO: o diretorio nao existe...\n\n"<<RESET;
 }
 
 void dir(){

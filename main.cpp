@@ -42,7 +42,7 @@ int main() {
 			if(cmd == "")
 				printf("");
 			else if(funcs.find(cmd.c_str()) == funcs.end())
-				cout<<RED<<"ERRO: Esta funcao nao existe...\n"<<RESET;
+				cout<<RED<<"\nERRO: Esta funcao nao existe...\n\n"<<RESET;
 			else{
 				funcs[cmd]();
 				cmd = "";
