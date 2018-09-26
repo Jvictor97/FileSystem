@@ -30,7 +30,7 @@ void create(){
             && inodes[aux].name == fileName 
             && inodes[aux].father_inode == actualInode.number)
         {
-            cout << RED << "ERRO: O arquivo \"" << YELLOW << fileName << RED << "\"" << " ja existe neste diretorio" << endl;
+            cout<<RED<<"\nERRO: O arquivo \""<<YELLOW<<fileName<<RED<<"\""<<" ja existe neste diretorio\n\n";
             return;
         }
     }
@@ -62,8 +62,9 @@ void create(){
     int actual;
 	for(actual = 0; actualInode.blocks[actual] != 0; actual++){
 		if(actual > 6){
-			cout<<RED<<"\nERRO: Numero máximo de blocos de endereco utilizado..."<<RESET<<endl;
-			cout<<YELLOW<<"Hint: Apague algum arquivo/diretorio ou formate seu HD para liberar espaco!"<<RESET<<endl;
+			cout<<RED<<"\nERRO: Numero máximo de blocos de endereco utilizado...\n"<<RESET;
+			cout<<YELLOW<<"Dica: Apague algum arquivo/diretorio ou formate seu HD para liberar espaco!\n\n"<<RESET;
+            inodes[i].initialize();
 			return;
 		}
 	}
@@ -84,12 +85,14 @@ void create(){
         if(content.size() > sizeBlock)
             content = content.substr(sizeBlock);
     }
-
+    // Atualiza o superblock com o número de blocos livres
+    superBlock.numFreeBlocks -= amtBlocks;
 }
 
 
 void removeFile(){
 	string filename = params[0];
+    int amtBlocks = 0;
 
 	for(int i = 0; i < 7; i++){
 		if(actualInode.blocks[i] != 0){
@@ -100,6 +103,7 @@ void removeFile(){
 			&& child.name == filename){
 				for(int j = 0; j < 7; j++){
 					if(child.blocks[j] != 0){
+                        amtBlocks++;
                         for(int b = 0; b < sizeBlock; b++){
                             datablocks[child.blocks[j] - superBlock.firstDataBlock][b] = 0;
                         }
@@ -108,6 +112,7 @@ void removeFile(){
                         //printInod(actualInode);
 					}
 				}
+                superBlock.numFreeBlocks += amtBlocks;
 				inodes[child.number - 1].initialize();
 				cout<<GREEN<<"\nArquivo \""<<YELLOW<<filename<<GREEN<<"\" removido com sucesso!\n\n";
 				return;
@@ -115,7 +120,7 @@ void removeFile(){
 		}
 	}
 
-	cout<<RED<<"ERRO: nenhum arquivo com o nome \""<<YELLOW<<filename<<RED<<"\" neste caminho.\n";
+	cout<<RED<<"\nERRO: nenhum arquivo com o nome \""<<YELLOW<<filename<<RED<<"\" neste caminho.\n\n";
 }                                                   
 
 
@@ -146,7 +151,44 @@ void type(){
 		}
 	}
 
-	cout<<RED<<"ERRO: nenhum arquivo com o nome \""<<YELLOW<<filename<<RED<<"\" neste caminho.\n";
+	cout<<RED<<"\nERRO: nenhum arquivo com o nome \""<<YELLOW<<filename<<RED<<"\" neste caminho.\n\n";
+}
+
+void rename(){
+    string currentName = params[0];
+    string newName = params[1];
+
+    int fileInode = 0;
+    bool newNameExists = false;
+    
+    for(int i = 0; i < 7; i++){
+        if(actualInode.blocks[i] != 0){
+			Inode child = inodes[actualInode.blocks[i] - 1];
+			
+			if(child.type == 2 // Se for um inode de arquivo
+			&& child.flag == 1 // Ativo
+            && child.father_inode == actualInode.number // E esta no diretorio atual
+            ){ 
+			    // Cujo nome seja o currentName
+                if(child.name == currentName){
+                    fileInode = child.number;
+                }
+                if(child.name == newName)
+                    newNameExists = true;
+            }
+        }
+    }
+
+    if(fileInode && !newNameExists){
+        // Renomeia o arquivo 
+        strncpy(inodes[fileInode - 1].name, newName.c_str(), sizeof(Inode::name));
+        // actualInode = inodes[actualInode.number - 1];
+    }
+    else   
+        if(!fileInode)
+        	cout<<RED<<"\nERRO: nenhum arquivo com o nome \""<<YELLOW<<currentName<<RED<<"\" neste caminho.\n\n";
+        else
+            cout<<RED<<"\nERRO: ja existe um arquivo com o nome \""<<YELLOW<<newName<<RED<<"\" neste caminho.\n\n";
 }
 
 #endif

@@ -173,14 +173,18 @@ void createhd()
 void selecionaHD(){
     // ÁREA DE MAPEAMENTO DE FUNÇÕES DE ESCOPO DO HD
 	map<std::string, functions> localMap;
+    // Entrega 1:
     localMap["createdir"] = createdir;
     localMap["cd"] = cd;
     localMap["dir"] = dir;
     localMap["create"] = create;
     localMap["remove"] = removeFile;
     localMap["type"] = type;
-    localMap["help"] = help;
 	localMap["exit"] = exitHD;
+
+    // Entrega 2:
+    localMap["rename"] = rename;
+    localMap["help"] = help;
     // FIM DA ÁREA DE MAPEAMENTO
 
     hd = fopen(nomeHD.c_str(), "r+");
@@ -193,7 +197,7 @@ void selecionaHD(){
     fread(&superBlock, sizeof(SuperBlock), 1, hd);
 
     // REMOVER PRINT SUPERBLOCK
-    // cout<<"\nSuperBlock: "<<endl;
+    //cout<<"\nSuperBlock: "<<endl;
     // printSuperBlock(superBlock);
 
     numBlocks = superBlock.numBlocks;
@@ -531,6 +535,12 @@ void getclause(){
 void dirhd(){
     configFile = fopen(".config", "r");
 
+    if(configFile == NULL){
+        cout<<RED<<"\nERRO: nao foi identificado um arquivo .config"<<endl;
+        cout<<YELLOW<<"Dica: crie um HD com o comando 'createhd' primeiro!\n\n"<<RESET;
+        return;
+    }
+
     fread(hdList, sizeof(Config), 20, configFile);
 
     printf(YELLOW "\n%-32s %-10s %-10s\n" RESET, "Nome", "Blocksize", "Numblocks");
@@ -561,7 +571,7 @@ void formathd(){
 }
 
 void typehd(){
-
+    int linhasPrintadas = 0;
     nomeHD = params[0] + ".mvpfs";
     configFile = fopen(".config", "r");
     fflush(hd);
@@ -576,42 +586,77 @@ void typehd(){
     sizeBlock = hdList[x].blockSize;
     numBlocks = hdList[x].numBlocks;
 
-    char * buffer = (char *) malloc(sizeof(char) * sizeBlock * numBlocks);
+    hd = fopen(nomeHD.c_str(), "rb+");
 
-    hd = fopen(nomeHD.c_str(), "r");
+    char ** buffer = (char **) malloc(sizeof(char*) * numBlocks);
+
+    for(int i = 0; i < numBlocks; i++){
+        buffer[i] = (char *) malloc(sizeof(char) * sizeBlock);
+        fread(buffer[i], sizeBlock, 1, hd);
+    }
+
     fflush(stdin);
     fflush(hd);
     fseek(hd, 0, SEEK_SET);
 
-    int id = 0;
-    while(id < sizeBlock * numBlocks){
-        fread(&buffer[id], sizeof(char), 1, hd);
-        id++;
+    //cout<<"Blocos: "<<numBlocks<<endl<<"size: "<<sizeBlock<<endl;
+
+    bool printChar = false, printedAny = false;
+    
+    for(int i = 0; i < numBlocks; i++){
+        if(!printChar)
+            printf(YELLOW "%04d  " RESET, i);
+        else
+            printf("      ");
+        for(int j = 0; j < sizeBlock; j++){
+            if(buffer[i][j] != 0){
+                printedAny = true;
+                if(buffer[i][j] > 32 && buffer[i][j] < 126){
+                    if(printChar){
+                        printf("%-3c", buffer[i][j]);
+                    }
+                    else{
+                        printf("%-3x", buffer[i][j]);  
+                    }
+                        
+                }else{
+                    printf("%-3c", '?');
+                }    
+            }
+            if(j == sizeBlock - 1){
+                if(printedAny){
+                    linhasPrintadas++;
+                    printf("\n");
+                    printedAny = false;
+                    if(!printChar){
+                        i -= 1;
+                        printChar = true;
+                    }
+                    else{
+                        printChar = false;
+                    }
+
+                    if(linhasPrintadas % 30 == 0){
+                        string auxiliar;
+                        getline(cin, auxiliar);
+                    }
+                }
+                else
+                    if(i == numBlocks - 1)
+                        printf("\r    ");
+                    else 
+                        printf("\r");
+            }
+        }
     }
-
-    cout<<YELLOW<<"\nHexadecimal:"<<RESET<<endl;
-
-    for(int i = 0; i < sizeBlock * numBlocks; i++){
-        if(buffer[i] != 0)
-            if(buffer[i] > 32 && buffer[i] < 126)
-                printf("%x ", buffer[i]);
-            else
-                printf("? ");
-    }
-
-    cout<<endl<<endl<<YELLOW<<"Char:"<<RESET<<endl;
-
-    for(int i = 0; i < sizeBlock * numBlocks; i++){
-        if(buffer[i] != 0)
-            if(buffer[i] > 32 && buffer[i] < 126)
-                printf("%c ", buffer[i]);
-           else
-                printf("? ");
-    }
-
     cout<<endl;
 
     fclose(hd);
+
+    for(int i = 0; i < numBlocks; i++){
+        free(buffer[i]);
+    }
+
     free(buffer);
 }
 
@@ -637,6 +682,43 @@ void printDataBlocks(){
         }
         printf("\n");
     }
+}
+
+void removehd(){
+    nomeHD = params[0];
+
+    configFile = fopen(".config", "r");
+
+    if(configFile == NULL){
+        cout<<RED<<"\nERRO: nao encontrado arquivo .config, caso algum HD exista o sistema esta corrompido!\n\n"<<RESET;
+        return;
+    }
+
+    fread(hdList, sizeof(Config), 20, configFile);
+    fclose(configFile);
+
+    int i;
+    for(i = 0; i < 20 && hdList[i].nomeHD != nomeHD; i++);
+
+    if(hdList[i].nomeHD != nomeHD){
+        cout<<RED<<"\nERRO: nenhum HD encontrado com o nome \""<<YELLOW<<nomeHD<<RED<<"\".\n\n"<<RESET;
+        return;
+    }
+
+    for(int j = i; j < 19; j++){
+        hdList[j] = hdList[j + 1];
+    }
+
+    configFile = fopen(".config", "w");
+    fwrite(hdList, sizeof(Config), 20, configFile);
+
+    string simpleHDname = nomeHD;
+
+    nomeHD += ".mvpfs";
+
+    remove(nomeHD.c_str());
+
+    cout<<GREEN<<"\nO HD \""<<YELLOW<<simpleHDname<<GREEN<<"\" foi removido com sucesso!\n\n"<<RESET;
 }
 
 #endif

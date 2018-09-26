@@ -15,6 +15,7 @@ void getclause();
 
 int main() {
 	map<std::string, functions> funcs;
+	// Entrega 1:
 	funcs["createhd"] = createhd;
 	funcs["formathd"] = formathd;
 	funcs["dirhd"] = dirhd;
@@ -22,6 +23,11 @@ int main() {
 	funcs["exit"] = exit;
 	funcs["help"] = help;
 	funcs["?"] = help;
+
+	// Entrega 2:
+	funcs["removehd"] = removehd;
+
+	system("clear");
 
 	cout<<"\n* Seja bem vindo ao MVPFS *";
 	cout<<"\nDigite a funcao que deseja executar:\n\n";
@@ -40,7 +46,7 @@ int main() {
 			if(cmd == "")
 				printf("");
 			else if(funcs.find(cmd.c_str()) == funcs.end())
-				cout<<RED<<"ERRO: Esta funcao nao existe...\n"<<RESET;
+				cout<<RED<<"\nERRO: Esta funcao nao existe...\n\n"<<RESET;
 			else{
 				funcs[cmd]();
 				cmd = "";
