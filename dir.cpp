@@ -149,7 +149,7 @@ char type(int i_type){
 void removedir(){
 	string dirname = params[0];
 
-	for(i = 0; i < 7; i++){
+	for(int i = 0; i < 7; i++){
 		if(actualInode.blocks[i] - 1 < totalInodes // Talvez isso esteja errado, não deveria-se subtrair 1
 			&& inodes[actualInode.blocks[i] - 1].flag == 1 
 			&& inodes[actualInode.blocks[i] - 1].type == 1 
@@ -175,20 +175,20 @@ void removeDirInode(int inodeNum){
 
 void removeFileInode(int inodeNum){
 	// Se for um inode de arquivo
-	Inode fileInode = inodes[inodeNum - 1];
-	for(int j = 0; j < 7; j++){
-		if(fileInode.blocks[j] != 0){
-			amtBlocks++;
-			for(int b = 0; b < sizeBlock; b++){
-				datablocks[fileInode.blocks[j] - superBlock.firstDataBlock][b] = 0;
-			}
-			bitmapDataBlocks.bitMapArray[fileInode.blocks[j] - superBlock.firstDataBlock] = 0;
-			inodes[actualInode.number - 1].blocks[i] = actualInode.blocks[i] = 0;
-			//printInod(actualInode);
-		}
-	}
-	superBlock.numFreeBlocks += amtBlocks;
-	inodes[fileInode.number - 1].initialize();
+	// Inode fileInode = inodes[inodeNum - 1];
+	// for(int j = 0; j < 7; j++){
+	// 	if(fileInode.blocks[j] != 0){
+	// 		amtBlocks++;
+	// 		for(int b = 0; b < sizeBlock; b++){
+	// 			datablocks[fileInode.blocks[j] - superBlock.firstDataBlock][b] = 0;
+	// 		}
+	// 		bitmapDataBlocks.bitMapArray[fileInode.blocks[j] - superBlock.firstDataBlock] = 0;
+	// 		inodes[actualInode.number - 1].blocks[i] = actualInode.blocks[i] = 0;
+	// 		//printInod(actualInode);
+	// 	}
+	// }
+	// superBlock.numFreeBlocks += amtBlocks;
+	// inodes[fileInode.number - 1].initialize();
 }
 
 #endif
