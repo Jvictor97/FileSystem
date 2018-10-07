@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include "globals.h"
+#include <string.h>
 
 using namespace std;
 
@@ -189,6 +190,187 @@ void rename(){
         	cout<<RED<<"\nERRO: nenhum arquivo com o nome \""<<YELLOW<<currentName<<RED<<"\" neste caminho.\n\n";
         else
             cout<<RED<<"\nERRO: ja existe um arquivo com o nome \""<<YELLOW<<newName<<RED<<"\" neste caminho.\n\n";
+}
+
+void copy(){
+    string curName = params[0];
+    string newName;
+    char * stringPath = (char *) malloc(sizeof(char) * params[1].length());
+    Inode searchInode;
+    int fileInode = 0;
+
+    for(int i = 0; i < 7; i++){
+        if(actualInode.blocks[i] != 0){
+            Inode child = inodes[actualInode.blocks[i] - 1];
+
+            if(child.flag == 1 // Se o inode estiver ativo
+            && child.type == 2 // For de tipo arquivo
+            && strcmp(child.name, params[0].c_str()) == 0 // Tiver o nome dado por params[0]
+            && child.father_inode == actualInode.number) // E que seja filho de actualInode
+            {
+                fileInode = child.number;
+            }
+        }
+    }
+
+    if(!fileInode){
+        cout<<RED<<"\nERRO: nenhum arquivo com o nome \""<<YELLOW<<params[0]<<RED"\" no caminho atual.\n\n";
+        return;
+    }
+
+    if(params[1].back() == '/')
+        newName = curName;
+    else{
+        int lastFolderEnd = params[1].rfind("/");
+
+        if(lastFolderEnd == -1)
+            newName = params[1];
+        else
+            newName = params[1].substr(lastFolderEnd + 1);
+            params[1].erase(lastFolderEnd + 1, params[1].length() - 1);
+    }
+
+    // INICIO REMOVER
+
+    // cout<<"Nome Atual: "<<curName<<endl;
+    // cout<<"Novo Nome: "<<newName<<endl;
+    // cout<<"Caminho: "<<params[1]<<endl;
+    // exit(0);
+
+    // FIM REMOVER
+
+    if(params[1][0] == '/'){
+        // Copia para o path baseado no root
+        strcpy(stringPath, params[1].substr(1).c_str());
+        searchInode = inodes[0];
+        //printf("Baseado no ROOT\n");
+    }
+    else if(params[1][0] == '.' && params[1][1] == '/'){
+        // Copia para o path baseado no inode atual
+        strcpy(stringPath, params[1].substr(2).c_str());
+        searchInode = actualInode;
+        //printf("Baseado no ATUAL\n");
+
+    }else{
+        // Copia para o path baseado no inode atual    
+        strcpy(stringPath, params[1].c_str());
+        searchInode = actualInode;
+        //printf("Baseado no ATUAL\n");
+
+    }
+
+    //printf("StringPath: \"%s\"\n", stringPath);
+
+    if(strcmp(stringPath, "") == 0){
+        cout<<RED<<"\nERRO: o arquivo não pode ser copiado com o mesmo nome para o mesmo caminho.\n\n";
+        return;
+    }
+
+	char * path;   
+	path = strtok(stringPath, "/");
+
+	while(path != NULL){
+		//cout<<path<<endl;
+        //cout<<"Path: "<<path<<endl;
+        int i;
+		for(i = 0; i < 7; i++){
+            if(searchInode.blocks[i] != 0 && searchInode.blocks[i] - 1 < totalInodes){
+                Inode child = inodes[searchInode.blocks[i] - 1];
+
+                if(child.type == 1 // Se for um inode de diretorio
+                && child.flag == 1 // Ativo
+                && strcmp(child.name, path) == 0 // Que possui o nome de path
+                && child.father_inode == searchInode.number // E esta no diretorio atual
+                ){ 
+                    searchInode = child;
+                    break;
+                }
+            }
+        }
+        if(i == 7){
+            cout<<RED<<"\nERRO: o caminho \""<<YELLOW<<params[1]<<RED<<"\" nao foi localizado.\n\n";
+            return;
+        }
+        path = strtok(NULL, "/");
+	}
+
+    Inode createInode = searchInode;
+
+    // printf("Nome do arquivo: %s\n", inodes[fileInode - 1].name);
+    // printf("Nome pasta: %s\n", searchInode.name);
+
+    // INICIO DO CREATE
+
+    int blankBlock = -1;
+
+    for(int aux = 0; aux < 7; aux++){
+        if(createInode.blocks[aux] != 0){
+            Inode child = inodes[createInode.blocks[aux] - 1];
+            if(child.type == 2 // Se o tipo for arquivo
+            && child.name == newName) // Com o mesmo nome do novo arquivo
+            {
+                cout<<RED<<"\nERRO: Um arquivo com nome \""<<YELLOW<<newName<<RED<<"\""<<" ja existe neste diretorio\n\n";
+                return;
+            }
+        }
+        else
+            if(blankBlock == -1)
+                blankBlock = aux; // Seleciona o bloco do inode Pasta em que o inode de arquivo será gravado        
+    }  
+
+    if(blankBlock == -1){
+        cout<<RED<<"\nERRO: Numero máximo de blocos de endereco utilizado...\n"<<RESET;
+        cout<<YELLOW<<"Dica: Apague algum arquivo/diretorio ou formate seu HD para liberar espaco!\n\n"<<RESET;
+        return;
+    }
+
+    // Concatena todo o conteúdo do arquivo original
+    string content;
+    Inode file = inodes[fileInode - 1];
+    cout<<"Nome arquivo: "<<file.name<<endl;
+    for(int n = 0; n < 7; n++){
+        if(file.blocks[n] != 0){
+            //cout<<datablocks[file.blocks[n] - superBlock.firstDataBlock];
+            content += datablocks[file.blocks[n] - superBlock.firstDataBlock];
+            //strcat(content, datablocks[file.blocks[n]]);
+        }
+    }
+
+    int node;
+    // Encontra o proximo Inode disponivel
+    for(node = 0; node < totalInodes && inodes[node].flag != 0; node++);
+
+    int amtBlocks = ceil((double) content.length() / (double)sizeBlock);
+
+    // Inicia a criação do inode de arquivo
+    inodes[node].flag = 1;
+    inodes[node].type = 2;
+    strncpy(inodes[node].name, newName.c_str(), sizeof(Inode::name));
+    inodes[node].father_inode = createInode.number;
+
+    int k;
+    // Encontra o proximo DataBlock disponivel
+    for(int j = 0; j < amtBlocks; j++){
+        for(k = 0; bitmapDataBlocks.bitMapArray[k] && k < numDataBlocks; k++);
+        bitmapDataBlocks.bitMapArray[k] = 1;
+        // Insere no inode arquivo as referências de datablocks utilizados
+        inodes[node].blocks[j] = k + superBlock.firstDataBlock;
+    }
+
+    // Insere no inode Pasta o número do filho (inode arquivo) no bloco dado por 'node'
+    inodes[createInode.number - 1].blocks[blankBlock] = inodes[node].number;
+
+    for(int j = 0; j < amtBlocks; j++){
+        strncpy(datablocks[inodes[node].blocks[j] - superBlock.firstDataBlock], content.substr(0,sizeBlock).c_str(), sizeBlock);
+        if(content.size() > sizeBlock)
+            content = content.substr(sizeBlock);
+    }
+    // Atualiza o superblock com o número de blocos livres
+    superBlock.numFreeBlocks -= amtBlocks;
+
+    // FIM DO CREATE
+
+    free(stringPath);
 }
 
 #endif

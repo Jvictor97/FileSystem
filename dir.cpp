@@ -111,7 +111,7 @@ void cd(){
 }
 
 void dir(){
-	printf(YELLOW "%-26s %-5s %-4s\n" RESET, "Nome", "Tipo", "Tamanho");
+	printf(YELLOW "\n%-26s %-5s %-4s\n" RESET, "Nome", "Tipo", "Tamanho");
 	//printInode(actualInode);
 	for(int i = 0; i < 7; i++){
 		if(actualInode.blocks[i] != 0){
