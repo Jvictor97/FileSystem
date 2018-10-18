@@ -122,6 +122,27 @@ void dir(){
 	}
 }
 
+void renamedir(){
+
+	string dirName = params[0];
+	string newDirName = params[1];
+
+	for(int i = 0; i < 7; i++){
+		if(actualInode.blocks[i] - 1 < totalInodes
+			&& inodes[actualInode.blocks[i] - 1].flag == 1 
+			&& inodes[actualInode.blocks[i] - 1].type == 1 
+			&& inodes[actualInode.blocks[i] - 1].name == dirName
+			&& inodes[actualInode.blocks[i] - 1].father_inode == actualInode.number)
+		{
+
+			strncpy(inodes[actualInode.blocks[i] - 1].name, newDirName.c_str(), sizeof(Inode::name));
+			
+			return;
+		}		
+	}
+	cout << RED << "\nERRO: O diretorio nao existe\n" << RESET;
+}
+
 int size(Inode child){
 	// Se for um inode de diretório retorna o tamanho do Inode
 	if(child.type == 1)

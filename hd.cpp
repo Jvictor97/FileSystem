@@ -177,6 +177,7 @@ void selecionaHD(){
     localMap["createdir"] = createdir;
     localMap["cd"] = cd;
     localMap["dir"] = dir;
+    localMap["renamedir"] = renamedir;
     localMap["create"] = create;
     localMap["remove"] = removeFile;
     localMap["type"] = type;
