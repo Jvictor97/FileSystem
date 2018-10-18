@@ -177,7 +177,6 @@ void selecionaHD(){
     localMap["createdir"] = createdir;
     localMap["cd"] = cd;
     localMap["dir"] = dir;
-    localMap["renamedir"] = renamedir;
     localMap["create"] = create;
     localMap["remove"] = removeFile;
     localMap["type"] = type;
@@ -187,6 +186,7 @@ void selecionaHD(){
     localMap["rename"] = rename;
     localMap["copy"] = copy;
     localMap["help"] = help;
+    localMap["renamedir"] = renamedir;
     // FIM DA ÁREA DE MAPEAMENTO
 
     hd = fopen(nomeHD.c_str(), "r+");
