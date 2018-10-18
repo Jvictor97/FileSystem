@@ -185,6 +185,7 @@ void selecionaHD(){
 
     // Entrega 2:
     localMap["rename"] = rename;
+    localMap["copy"] = copy;
     localMap["help"] = help;
     // FIM DA ÁREA DE MAPEAMENTO
 
@@ -281,7 +282,7 @@ void selecionaHD(){
         if(cmd == "")
             printf("");
         else if(localMap.find(cmd.c_str()) == localMap.end())
-            cout<<RED"ERRO: Esta funcao nao existe...\n"<<RESET;
+            cout<<RED<<"\nERRO: Esta funcao nao existe...\n\n"<<RESET;
         else{
             localMap[cmd]();
             cmd = cmd != "exit" ? "" : "exitHD";
@@ -720,6 +721,49 @@ void removehd(){
     remove(nomeHD.c_str());
 
     cout<<GREEN<<"\nO HD \""<<YELLOW<<simpleHDname<<GREEN<<"\" foi removido com sucesso!\n\n"<<RESET;
+}
+
+void statushd(){
+    string simpleHDname = params[0];
+    nomeHD = params[0] + ".mvpfs";
+    hd = fopen(nomeHD.c_str(), "r");
+
+    fread(&superBlock, sizeof(SuperBlock), 1, hd);
+
+    numBlocks = superBlock.numBlocks;
+    sizeBlock = superBlock.blockSize;
+    inodeBlocks = superBlock.numInodeBlocks;
+
+    int offsetInodeBlock = superBlock.firstInodeBlock * sizeBlock;
+
+    fseek(hd, offsetInodeBlock, SEEK_SET);
+
+    inodesPerBlock = floor(sizeBlock / sizeof(Inode));
+
+    totalInodes = inodesPerBlock * inodeBlocks;
+    
+    inodes = (Inode *) malloc(sizeof(Inode) * inodesPerBlock * inodeBlocks);
+
+    int space = sizeBlock;
+
+    for(int i = 0; i < totalInodes; i++){
+        if(space < sizeof(Inode)){
+            fseek(hd, space, SEEK_CUR);
+            space = sizeBlock;
+        }
+        fread(&inodes[i], sizeof(Inode), 1, hd);
+        space-=sizeof(Inode);
+    }
+
+    int numFreeInodes = totalInodes;
+
+    for(int i = 0; i < totalInodes; i++){
+        if(inodes[i].flag != 0)
+            numFreeInodes--;
+    }
+
+    printf(YELLOW "\n%-32s %-6s %-7s %-6s %-13s %-13s\n" RESET, "Nome do HD", "Blocos", "Tamanho", "Inodes", "Blocos-Livres", "Inodes-Livres");
+    printf("%-32s %-6d %-7d %-6d %-13d %-13d\n\n" RESET, nomeHD.c_str(), numBlocks, sizeBlock, totalInodes, superBlock.numFreeBlocks, numFreeInodes);
 }
 
 #endif

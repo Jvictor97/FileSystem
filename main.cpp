@@ -26,6 +26,7 @@ int main() {
 
 	// Entrega 2:
 	funcs["removehd"] = removehd;
+	funcs["statushd"] = statushd;
 
 	system("clear");
 
@@ -40,6 +41,7 @@ int main() {
 			cmd.back() = '.';
 			cmd += "mvpfs";
 			nomeHD = cmd;
+			cmd = "";
 			selecionaHD();
 		}
 		else
