@@ -177,7 +177,7 @@ void removedir(){
 			&& inodes[actualInode.blocks[i] - 1].name == dirname
 			&& inodes[actualInode.blocks[i] - 1].father_inode == actualInode.number)
 		{
-			removeChildInodes(i);
+			//removeChildInodes(i);
 			inodes[i].initialize();
 			return;
 		}

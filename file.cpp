@@ -8,6 +8,8 @@
 
 using namespace std;
 
+bool movingFile = false;
+
 void printInod(Inode i){
     printf("Flag: %d\n", i.flag);
     printf("Type: %d\n", i.type);
@@ -115,7 +117,8 @@ void removeFile(){
 				}
                 superBlock.numFreeBlocks += amtBlocks;
 				inodes[child.number - 1].initialize();
-				cout<<GREEN<<"\nArquivo \""<<YELLOW<<filename<<GREEN<<"\" removido com sucesso!\n\n";
+                if(!movingFile)
+			    	cout<<GREEN<<"\nArquivo \""<<YELLOW<<filename<<GREEN<<"\" removido com sucesso!\n\n";
 				return;
 			}
 		}
@@ -327,7 +330,7 @@ void copy(){
     // Concatena todo o conteúdo do arquivo original
     string content;
     Inode file = inodes[fileInode - 1];
-    cout<<"Nome arquivo: "<<file.name<<endl;
+    //cout<<"Nome arquivo: "<<file.name<<endl;
     for(int n = 0; n < 7; n++){
         if(file.blocks[n] != 0){
             //cout<<datablocks[file.blocks[n] - superBlock.firstDataBlock];
@@ -370,7 +373,20 @@ void copy(){
 
     // FIM DO CREATE
 
+    if(!movingFile)
+        cout<<GREEN<<"\nArquivo \""<<YELLOW<<curName<<GREEN"\" copiado com sucesso!\n\n"<<RESET;
+
     free(stringPath);
+}
+
+void move(){
+    movingFile = true;
+
+    copy();
+    removeFile();
+
+    cout<<GREEN<<"\nArquivo \""<<YELLOW<<params[0]<<GREEN"\" movido com sucesso!\n\n"<<RESET;
+    movingFile = false;
 }
 
 #endif
