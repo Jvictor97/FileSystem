@@ -293,15 +293,6 @@ void copydir(){
 		}
     }
 
-    // INICIO REMOVER
-
-    // cout<<"Nome Atual: "<<curName<<endl;
-    // cout<<"Novo Nome: "<<newName<<endl;
-    // cout<<"Caminho: "<<params[1]<<endl;
-    // exit(0);
-
-    // FIM REMOVER
-
     if(params[1][0] == '/'){
         // Copia para o path baseado no root
         strcpy(stringPath, params[1].substr(1).c_str());
@@ -359,9 +350,9 @@ void copydir(){
 	    Inode createInode = searchInode;
 
 		if(actualInode.number == createInode.number && curName == newName) {
-        cout<<RED<<"\nERRO: o arquivo não pode ser copiado com o mesmo nome para o mesmo caminho.\n\n";
-        return;
-    }
+			cout<<RED<<"\nERRO: o arquivo não pode ser copiado com o mesmo nome para o mesmo caminho.\n\n";
+			return;
+    	}
 
     // printf("Nome do arquivo: %s\n", inodes[fileInode - 1].name);
     // printf("Nome pasta: %s\n", searchInode.name);
@@ -393,7 +384,7 @@ void copydir(){
 
     // Guarda conteúdo os Inodes que são filhos de diretorio
     Inode dirInode = inodes[fileInode - 1];
-    cout<<"Nome arquivo: "<<dirInode.name<<endl;
+    cout<<"Nome dir: "<<dirInode.name<<endl;
 
 	Inode saveActual = actualInode;
 
@@ -403,64 +394,6 @@ void copydir(){
 
 	actualInode = saveActual;
 	return;
-	/*Sequencia da logica:
-	1) Se o iNode filho for de diretorio, percorrer pelos seus descendentes até que se encontre o ultimo
-	  descendente diretorio,  achar um iNode livre no vetor de iNode, e copiar o inode.
-	2) Se o iNode filho for de arquivo, achar um iNode livre no vetor de iNode, guardar o conteudo dos datablocks do inode filho
-	
-	*/
-
-
-
-	// for(int n = 0; n < nKids; n++){
-	// 	//Inode de diretorio
-	// 	if(kids[n].type == 1){
-	// 		for(int localNode = 0; localNode; ++){
-				
-	// 		}
-	// 	}
-	// }
-
-/*
-    int node;
-    // Encontra o proximo Inode disponivel
-    for(node = 0; node < totalInodes && inodes[node].flag != 0; node++);
-
-    int amtBlocks = ceil((double) content.length() / (double)sizeBlock);
-
-    // Inicia a criação do inode de arquivo
-    inodes[node].flag = 1;
-    inodes[node].type = 2;
-    strncpy(inodes[node].name, newName.c_str(), sizeof(Inode::name));
-    inodes[node].father_inode = createInode.number;
-
-    int k;
-    // Encontra o proximo DataBlock disponivel
-    for(int j = 0; j < amtBlocks; j++){
-        for(k = 0; bitmapDataBlocks.bitMapArray[k] && k < numDataBlocks; k++);
-        bitmapDataBlocks.bitMapArray[k] = 1;
-        // Insere no inode arquivo as referências de datablocks utilizados
-        inodes[node].blocks[j] = k + superBlock.firstDataBlock;
-    }
-
-    // Insere no inode Pasta o número do filho (inode arquivo) no bloco dado por 'node'
-    inodes[createInode.number - 1].blocks[blankBlock] = inodes[node].number;
-
-    for(int j = 0; j < amtBlocks; j++){
-        strncpy(datablocks[inodes[node].blocks[j] - superBlock.firstDataBlock], content.substr(0,sizeBlock).c_str(), sizeBlock);
-        if(content.size() > sizeBlock)
-            content = content.substr(sizeBlock);
-    }
-    // Atualiza o superblock com o número de blocos livres
-    superBlock.numFreeBlocks -= amtBlocks;
-
-    // FIM DO CREATE
-
-    if(!movingFile)
-        cout<<GREEN<<"\nArquivo \""<<YELLOW<<curName<<GREEN"\" copiado com sucesso!\n\n"<<RESET;
-
-    free(stringPath);
-	*/
 }
 
 
