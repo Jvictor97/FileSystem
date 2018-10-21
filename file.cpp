@@ -306,10 +306,10 @@ void copy(){
 
         createInode = searchInode;
     }    
-    else
+    else{
         createInode = inodes[definedCreateInode - 1];
-
-    definedCreateInode = -1; // Seta novamente para -1 para permitir chamadas normais
+        newName = curName;
+    }
 
     if(actualInode.number == createInode.number && curName == newName) {
         cout<<RED<<"\nERRO: o arquivo não pode ser copiado com o mesmo nome para o mesmo caminho.\n\n";
@@ -393,8 +393,10 @@ void copy(){
 
     // FIM DO CREATE
 
-    if(!movingFile)
+    if(!movingFile && definedCreateInode == -1)
         cout<<GREEN<<"\nArquivo \""<<YELLOW<<curName<<GREEN"\" copiado com sucesso!\n\n"<<RESET;
+
+    definedCreateInode = -1; // Seta novamente para -1 para permitir chamadas normais
 
     free(stringPath);
 }
