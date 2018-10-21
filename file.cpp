@@ -225,12 +225,16 @@ void copy(){
         newName = curName;
     else{
         int lastFolderEnd = params[1].rfind("/");
+        int currFolderSign = params[1].rfind("./");
 
         if(lastFolderEnd == -1)
             newName = params[1];
-        else
-            newName = params[1].substr(lastFolderEnd + 1);
-            params[1].erase(lastFolderEnd + 1, params[1].length() - 1);
+        else{
+                newName = params[1].substr(lastFolderEnd + 1);
+                params[1].erase(lastFolderEnd + 1, params[1].length() - 1);
+                //cout<<"\nPath: "<<params[1]<<endl;
+                //cout<<"\nNome: "<<newName<<endl;
+        }
     }
 
     // INICIO REMOVER
@@ -252,27 +256,25 @@ void copy(){
         // Copia para o path baseado no inode atual
         strcpy(stringPath, params[1].substr(2).c_str());
         searchInode = actualInode;
-        //printf("Baseado no ATUAL\n");
-
+        //printf("Baseado no ATUAL com ponto\n");
     }else{
         // Copia para o path baseado no inode atual    
         strcpy(stringPath, params[1].c_str());
         searchInode = actualInode;
         //printf("Baseado no ATUAL\n");
-
     }
 
     //printf("StringPath: \"%s\"\n", stringPath);
 
-    if(strcmp(stringPath, "") == 0){
-        cout<<RED<<"\nERRO: o arquivo não pode ser copiado com o mesmo nome para o mesmo caminho.\n\n";
-        return;
-    }
+	char * path;
+    string fullPath; 
 
-	char * path;   
+    fullPath = stringPath;
 	path = strtok(stringPath, "/");
 
-	while(path != NULL){
+
+	while(path != NULL && fullPath.find("/") != -1){
+        //cout<<"\nEntrou no while"<<endl;
 		//cout<<path<<endl;
         //cout<<"Path: "<<path<<endl;
         int i;
@@ -298,6 +300,11 @@ void copy(){
 	}
 
     Inode createInode = searchInode;
+
+    if(actualInode.number == createInode.number && curName == newName) {
+        cout<<RED<<"\nERRO: o arquivo não pode ser copiado com o mesmo nome para o mesmo caminho.\n\n";
+        return;
+    }
 
     // printf("Nome do arquivo: %s\n", inodes[fileInode - 1].name);
     // printf("Nome pasta: %s\n", searchInode.name);
@@ -330,6 +337,7 @@ void copy(){
     // Concatena todo o conteúdo do arquivo original
     string content;
     Inode file = inodes[fileInode - 1];
+    //cout<<"Nome destino: "<<createInode.name<<endl;
     //cout<<"Nome arquivo: "<<file.name<<endl;
     for(int n = 0; n < 7; n++){
         if(file.blocks[n] != 0){
@@ -370,6 +378,8 @@ void copy(){
     }
     // Atualiza o superblock com o número de blocos livres
     superBlock.numFreeBlocks -= amtBlocks;
+    // Atualiza o inode atual
+    actualInode = inodes[actualInode.number - 1];
 
     // FIM DO CREATE
 
@@ -390,4 +400,3 @@ void move(){
 }
 
 #endif
-
