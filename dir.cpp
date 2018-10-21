@@ -482,8 +482,11 @@ void copyDirInode(Inode dirInode, Inode createInode){
 			}
 			else{
 				
+				actualInode = dirInode;
 				params[0] = inodes[dirInode.blocks[i] - 1].name;
+				definedCreateInode = actualDirInode.number;
 				copy();
+				actualInode = createInode;
 				cout << "FAZ O ARQUIVO" << endl;
 			}
 		}
