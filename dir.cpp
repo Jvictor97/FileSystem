@@ -459,14 +459,17 @@ void copyDirInode(Inode dirInode, Inode createInode){
 	params[0] = dirInode.name;
 	actualInode = createInode;
 	createdir();
+	Inode actualDirInode = createdDirInode;
 
 	for(int i = 0; i < 7; i++){
 		if(dirInode.blocks[i] != 0){
 			if(inodes[dirInode.blocks[i] - 1].type == 1){
 				copyDirInode(inodes[dirInode.blocks[i] -1],  createdDirInode);
+				actualInode = createInode;
 			}
 			else{
-
+				
+				params[0] = inodes[dirInode.blocks[i] - 1].name;
 				copy();
 				cout << "FAZ O ARQUIVO" << endl;
 			}
