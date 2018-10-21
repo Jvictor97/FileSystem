@@ -221,10 +221,27 @@ void copy(){
         return;
     }
 
-    if(params[1].back() == '/')
-        newName = curName;
-    else{
-        int lastFolderEnd = params[1].rfind("/");
+    Inode createInode; // declarado createInode
+
+    if(definedCreateInode == -1){
+
+        if(params[1].back() == '/')
+            newName = curName;
+        else{
+            int lastFolderEnd = params[1].rfind("/");
+            int currFolderSign = params[1].rfind("./");
+
+            if(lastFolderEnd == -1)
+                newName = params[1];
+            else{
+                    newName = params[1].substr(lastFolderEnd + 1);
+                    params[1].erase(lastFolderEnd + 1, params[1].length() - 1);
+                    //cout<<"\nPath: "<<params[1]<<endl;
+                    //cout<<"\nNome: "<<newName<<endl;
+            }
+        }
+
+        // INICIO REMOVER
 
         if(lastFolderEnd == -1)
             newName = params[1];
