@@ -171,6 +171,7 @@ void createhd()
 }
 
 void selecionaHD(){
+    definedCreateInode = -1;
     // ÁREA DE MAPEAMENTO DE FUNÇÕES DE ESCOPO DO HD
 	map<std::string, functions> localMap;
     // Entrega 1:

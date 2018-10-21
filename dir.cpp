@@ -16,7 +16,8 @@ using namespace std;
 
 int size(Inode);
 char type(int);
-void removeDirInode(int);
+void removeDirInode(Inode);
+void removeFileInode(Inode);
 
 void printInode(Inode i){
     printf("Flag: %d\n", i.flag);
@@ -171,14 +172,15 @@ void removedir(){
 	string dirname = params[0];
 
 	for(int i = 0; i < 7; i++){
-		if(actualInode.blocks[i] - 1 < totalInodes // Talvez isso esteja errado, não deveria-se subtrair 1
+		if(actualInode.blocks[i] != 0 
 			&& inodes[actualInode.blocks[i] - 1].flag == 1 
 			&& inodes[actualInode.blocks[i] - 1].type == 1 
 			&& inodes[actualInode.blocks[i] - 1].name == dirname
 			&& inodes[actualInode.blocks[i] - 1].father_inode == actualInode.number)
 		{
-			//removeChildInodes(i);
-			inodes[i].initialize();
+			Inode curInode = actualInode;
+			removeDirInode(inodes[actualInode.blocks[i] - 1]);
+			actualInode = curInode;
 			return;
 		}
 	}
@@ -186,15 +188,26 @@ void removedir(){
 	cout<<RED<<"\nERRO: nenhum diretorio com o nome \""<<YELLOW<<dirname<<RED<<"\" no caminho atual.\n\n";
 }
 
-void removeChildInodes(int inodeNum){
-	
+void removeDirInode(Inode dirInode){
+	for(int i = 0; i < 7; i++){
+		if(dirInode.blocks[i] != 0 && inodes[dirInode.blocks[i] - 1].flag == 1)
+		{
+			if(inodes[dirInode.blocks[i] - 1].type == 1) // Diretório
+				removeDirInode(inodes[dirInode.blocks[i] - 1]);
+			else
+				if(inodes[dirInode.blocks[i] - 1].type == 2) // Arquivo
+					removeFileInode(inodes[dirInode.blocks[i] - 1]);
+		}
+	}
+	inodes[dirInode.number - 1].initialize();
 }
 
-void removeDirInode(int inodeNum){
+void removeFileInode(Inode fileInode){
 
-}
+	actualInode = inodes[fileInode.father_inode - 1];
+	params[0] = fileInode.name;
+	removeFile();
 
-void removeFileInode(int inodeNum){
 	// Se for um inode de arquivo
 	// Inode fileInode = inodes[inodeNum - 1];
 	// for(int j = 0; j < 7; j++){
