@@ -297,7 +297,17 @@ void copy(){
         path = strtok(NULL, "/");
 	}
 
-    Inode createInode = searchInode;
+        createInode = searchInode;
+    }    
+    else{
+        createInode = inodes[definedCreateInode - 1];
+        newName = curName;
+    }
+
+    if(actualInode.number == createInode.number && curName == newName) {
+        cout<<RED<<"\nERRO: o arquivo não pode ser copiado com o mesmo nome para o mesmo caminho.\n\n";
+        return;
+    }
 
     // printf("Nome do arquivo: %s\n", inodes[fileInode - 1].name);
     // printf("Nome pasta: %s\n", searchInode.name);
@@ -373,8 +383,10 @@ void copy(){
 
     // FIM DO CREATE
 
-    if(!movingFile)
+    if(!movingFile && definedCreateInode == -1)
         cout<<GREEN<<"\nArquivo \""<<YELLOW<<curName<<GREEN"\" copiado com sucesso!\n\n"<<RESET;
+
+    definedCreateInode = -1; // Seta novamente para -1 para permitir chamadas normais
 
     free(stringPath);
 }
