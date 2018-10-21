@@ -184,7 +184,8 @@ void removedir(){
 		{
 			Inode curInode = actualInode;
 			removeDirInode(inodes[actualInode.blocks[i] - 1]);
-			actualInode = curInode;
+			curInode.blocks[i] = 0;
+			inodes[curInode.number - 1] = actualInode = curInode;
 			return;
 		}
 	}
