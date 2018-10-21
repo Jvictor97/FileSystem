@@ -222,7 +222,7 @@ void copy(){
         return;
     }
 
-    Inode createInode;
+    Inode createInode; // declarado createInode
 
     if(definedCreateInode == -1){
 
