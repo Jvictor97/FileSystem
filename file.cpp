@@ -9,6 +9,7 @@
 using namespace std;
 
 bool movingFile = false;
+int definedCreateInode;
 
 void printInod(Inode i){
     printf("Flag: %d\n", i.flag);
@@ -221,85 +222,94 @@ void copy(){
         return;
     }
 
-    if(params[1].back() == '/')
-        newName = curName;
-    else{
-        int lastFolderEnd = params[1].rfind("/");
-        int currFolderSign = params[1].rfind("./");
+    Inode createInode;
 
-        if(lastFolderEnd == -1)
-            newName = params[1];
+    if(definedCreateInode == -1){
+
+        if(params[1].back() == '/')
+            newName = curName;
         else{
-                newName = params[1].substr(lastFolderEnd + 1);
-                params[1].erase(lastFolderEnd + 1, params[1].length() - 1);
-                //cout<<"\nPath: "<<params[1]<<endl;
-                //cout<<"\nNome: "<<newName<<endl;
-        }
-    }
+            int lastFolderEnd = params[1].rfind("/");
+            int currFolderSign = params[1].rfind("./");
 
-    // INICIO REMOVER
-
-    // cout<<"Nome Atual: "<<curName<<endl;
-    // cout<<"Novo Nome: "<<newName<<endl;
-    // cout<<"Caminho: "<<params[1]<<endl;
-    // exit(0);
-
-    // FIM REMOVER
-
-    if(params[1][0] == '/'){
-        // Copia para o path baseado no root
-        strcpy(stringPath, params[1].substr(1).c_str());
-        searchInode = inodes[0];
-        //printf("Baseado no ROOT\n");
-    }
-    else if(params[1][0] == '.' && params[1][1] == '/'){
-        // Copia para o path baseado no inode atual
-        strcpy(stringPath, params[1].substr(2).c_str());
-        searchInode = actualInode;
-        //printf("Baseado no ATUAL com ponto\n");
-    }else{
-        // Copia para o path baseado no inode atual    
-        strcpy(stringPath, params[1].c_str());
-        searchInode = actualInode;
-        //printf("Baseado no ATUAL\n");
-    }
-
-    //printf("StringPath: \"%s\"\n", stringPath);
-
-	char * path;
-    string fullPath; 
-
-    fullPath = stringPath;
-	path = strtok(stringPath, "/");
-
-
-	while(path != NULL && fullPath.find("/") != -1){
-        //cout<<"\nEntrou no while"<<endl;
-		//cout<<path<<endl;
-        //cout<<"Path: "<<path<<endl;
-        int i;
-		for(i = 0; i < 7; i++){
-            if(searchInode.blocks[i] != 0 && searchInode.blocks[i] - 1 < totalInodes){
-                Inode child = inodes[searchInode.blocks[i] - 1];
-
-                if(child.type == 1 // Se for um inode de diretorio
-                && child.flag == 1 // Ativo
-                && strcmp(child.name, path) == 0 // Que possui o nome de path
-                && child.father_inode == searchInode.number // E esta no diretorio atual
-                ){ 
-                    searchInode = child;
-                    break;
-                }
+            if(lastFolderEnd == -1)
+                newName = params[1];
+            else{
+                    newName = params[1].substr(lastFolderEnd + 1);
+                    params[1].erase(lastFolderEnd + 1, params[1].length() - 1);
+                    //cout<<"\nPath: "<<params[1]<<endl;
+                    //cout<<"\nNome: "<<newName<<endl;
             }
         }
-        if(i == 7){
-            cout<<RED<<"\nERRO: o caminho \""<<YELLOW<<params[1]<<RED<<"\" nao foi localizado.\n\n";
-            return;
-        }
-        path = strtok(NULL, "/");
-	}
 
-    Inode createInode = searchInode;
+        // INICIO REMOVER
+
+        // cout<<"Nome Atual: "<<curName<<endl;
+        // cout<<"Novo Nome: "<<newName<<endl;
+        // cout<<"Caminho: "<<params[1]<<endl;
+        // exit(0);
+
+        // FIM REMOVER
+
+        if(params[1][0] == '/'){
+            // Copia para o path baseado no root
+            strcpy(stringPath, params[1].substr(1).c_str());
+            searchInode = inodes[0];
+            //printf("Baseado no ROOT\n");
+        }
+        else if(params[1][0] == '.' && params[1][1] == '/'){
+            // Copia para o path baseado no inode atual
+            strcpy(stringPath, params[1].substr(2).c_str());
+            searchInode = actualInode;
+            //printf("Baseado no ATUAL com ponto\n");
+        }else{
+            // Copia para o path baseado no inode atual    
+            strcpy(stringPath, params[1].c_str());
+            searchInode = actualInode;
+            //printf("Baseado no ATUAL\n");
+        }
+
+        //printf("StringPath: \"%s\"\n", stringPath);
+
+        char * path;
+        string fullPath; 
+
+        fullPath = stringPath;
+        path = strtok(stringPath, "/");
+
+
+        while(path != NULL && fullPath.find("/") != -1 && definedCreateInode == -1){
+            //cout<<"\nEntrou no while"<<endl;
+            //cout<<path<<endl;
+            //cout<<"Path: "<<path<<endl;
+            int i;
+            for(i = 0; i < 7; i++){
+                if(searchInode.blocks[i] != 0 && searchInode.blocks[i] - 1 < totalInodes){
+                    Inode child = inodes[searchInode.blocks[i] - 1];
+
+                    if(child.type == 1 // Se for um inode de diretorio
+                    && child.flag == 1 // Ativo
+                    && strcmp(child.name, path) == 0 // Que possui o nome de path
+                    && child.father_inode == searchInode.number // E esta no diretorio atual
+                    ){ 
+                        searchInode = child;
+                        break;
+                    }
+                }
+            }
+            if(i == 7){
+                cout<<RED<<"\nERRO: o caminho \""<<YELLOW<<params[1]<<RED<<"\" nao foi localizado.\n\n";
+                return;
+            }
+            path = strtok(NULL, "/");
+        }
+
+        createInode = searchInode;
+    }    
+    else
+        createInode = inodes[definedCreateInode - 1];
+
+    definedCreateInode = -1; // Seta novamente para -1 para permitir chamadas normais
 
     if(actualInode.number == createInode.number && curName == newName) {
         cout<<RED<<"\nERRO: o arquivo não pode ser copiado com o mesmo nome para o mesmo caminho.\n\n";
