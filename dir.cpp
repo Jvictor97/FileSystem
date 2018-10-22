@@ -21,6 +21,7 @@ void copyDirInode(Inode dirInode, Inode createInode);
 Inode createdDirInode;
 void removeDirInode(Inode);
 void removeFileInode(Inode);
+int copyingDir = false;
 
 void printInode(Inode i){
     printf("Flag: %d\n", i.flag);
@@ -60,7 +61,6 @@ void createdir(){
 		return;
 	}
 
-
 	// Encontra bloco disponivel do Inode pai
 	for(j = 0; actualInode.blocks[j] != 0; j++){
 		if(j > 6){
@@ -76,6 +76,9 @@ void createdir(){
 	inodes[i].father_inode = actualInode.number;
 	inodes[actualInode.number - 1].blocks[j] = actualInode.blocks[j] = inodes[i].number;
 	createdDirInode = inodes[i];
+
+	if(!copyingDir)
+		cout<<GREEN<<"\nDiretorio \""<<YELLOW<<name<<GREEN<<"\" criado com sucesso!\n\n";
 }
 
 void cd(){
@@ -251,6 +254,8 @@ void movedir(){
 
 void copydir(){
 
+	copyingDir = true;
+
 	string curName = params[0];
     string newName;
     char * stringPath = (char *) malloc(sizeof(char) * params[1].length());
@@ -272,7 +277,7 @@ void copydir(){
     }
 
     if(!fileInode){
-        cout<<RED<<"\nERRO: nenhum arquivo com o nome \""<<YELLOW<<params[0]<<RED"\" no caminho atual.\n\n";
+        cout<<RED<<"\nERRO: nenhum diretorio com o nome \""<<YELLOW<<params[0]<<RED"\" no caminho atual.\n\n";
         return;
     }
 
@@ -281,10 +286,10 @@ void copydir(){
         newName = curName;
     else{
         int lastFolderEnd = params[1].rfind("/");
-		cout << "Last: " << lastFolderEnd << endl;
+		//cout << "Last: " << lastFolderEnd << endl;
 		// USAGE: copydir dir dir2
         if(lastFolderEnd == -1){
-			cout << "ENTROU NO LAST" << endl;
+			//cout << "ENTROU NO LAST" << endl;
             newName = params[1];
 		}
 		// USAGE: copydir dir /dir/subdir/dirName
@@ -293,15 +298,6 @@ void copydir(){
             params[1].erase(lastFolderEnd + 1, params[1].length() - 1);
 		}
     }
-
-    // INICIO REMOVER
-
-    // cout<<"Nome Atual: "<<curName<<endl;
-    // cout<<"Novo Nome: "<<newName<<endl;
-    // cout<<"Caminho: "<<params[1]<<endl;
-    // exit(0);
-
-    // FIM REMOVER
 
     if(params[1][0] == '/'){
         // Copia para o path baseado no root
@@ -319,7 +315,7 @@ void copydir(){
         // Copia para o path baseado no inode atual    
         strcpy(stringPath, params[1].c_str());
         searchInode = actualInode;
-        printf("Baseado no ATUAL\n");
+        //printf("Baseado no ATUAL\n");
 
     }
 
@@ -394,81 +390,26 @@ void copydir(){
 
     // Guarda conteúdo os Inodes que são filhos de diretorio
     Inode dirInode = inodes[fileInode - 1];
-    cout<<"Nome arquivo: "<<dirInode.name<<endl;
+    //cout<<"Nome arquivo: "<<dirInode.name<<endl;
 
 	Inode saveActual = actualInode;
 
-	cout << "AQUI : \n\n" << endl;
+	//cout << "AQUI : \n\n" << endl;
 
 	copyDirInode(dirInode, createInode);
 
 	actualInode = saveActual;
+	cout<<GREEN<<"\nDiretorio \""<<YELLOW<<curName<<GREEN<<"\" copiado com sucesso!\n\n";
+
+	copyingDir = false;
 	return;
-	/*Sequencia da logica:
-	1) Se o iNode filho for de diretorio, percorrer pelos seus descendentes até que se encontre o ultimo
-	  descendente diretorio,  achar um iNode livre no vetor de iNode, e copiar o inode.
-	2) Se o iNode filho for de arquivo, achar um iNode livre no vetor de iNode, guardar o conteudo dos datablocks do inode filho
-	
-	*/
-
-
-
-	// for(int n = 0; n < nKids; n++){
-	// 	//Inode de diretorio
-	// 	if(kids[n].type == 1){
-	// 		for(int localNode = 0; localNode; ++){
-				
-	// 		}
-	// 	}
-	// }
-
-/*
-    int node;
-    // Encontra o proximo Inode disponivel
-    for(node = 0; node < totalInodes && inodes[node].flag != 0; node++);
-
-    int amtBlocks = ceil((double) content.length() / (double)sizeBlock);
-
-    // Inicia a criação do inode de arquivo
-    inodes[node].flag = 1;
-    inodes[node].type = 2;
-    strncpy(inodes[node].name, newName.c_str(), sizeof(Inode::name));
-    inodes[node].father_inode = createInode.number;
-
-    int k;
-    // Encontra o proximo DataBlock disponivel
-    for(int j = 0; j < amtBlocks; j++){
-        for(k = 0; bitmapDataBlocks.bitMapArray[k] && k < numDataBlocks; k++);
-        bitmapDataBlocks.bitMapArray[k] = 1;
-        // Insere no inode arquivo as referências de datablocks utilizados
-        inodes[node].blocks[j] = k + superBlock.firstDataBlock;
-    }
-
-    // Insere no inode Pasta o número do filho (inode arquivo) no bloco dado por 'node'
-    inodes[createInode.number - 1].blocks[blankBlock] = inodes[node].number;
-
-    for(int j = 0; j < amtBlocks; j++){
-        strncpy(datablocks[inodes[node].blocks[j] - superBlock.firstDataBlock], content.substr(0,sizeBlock).c_str(), sizeBlock);
-        if(content.size() > sizeBlock)
-            content = content.substr(sizeBlock);
-    }
-    // Atualiza o superblock com o número de blocos livres
-    superBlock.numFreeBlocks -= amtBlocks;
-
-    // FIM DO CREATE
-
-    if(!movingFile)
-        cout<<GREEN<<"\nArquivo \""<<YELLOW<<curName<<GREEN"\" copiado com sucesso!\n\n"<<RESET;
-
-    free(stringPath);
-	*/
 }
 
 
 void copyDirInode(Inode dirInode, Inode createInode){
 
-	cout << "dirInode:" << dirInode.name << endl;
-	cout << "createInode: " << createInode.name << endl;
+	//cout << "dirInode:" << dirInode.name << endl;
+	//cout << "createInode: " << createInode.name << endl;
 
 	params[0] = dirInode.name;
 	actualInode = createInode;
@@ -478,7 +419,7 @@ void copyDirInode(Inode dirInode, Inode createInode){
 	for(int i = 0; i < 7; i++){
 		if(dirInode.blocks[i] != 0){
 			if(inodes[dirInode.blocks[i] - 1].type == 1){
-				copyDirInode(inodes[dirInode.blocks[i] -1],  createdDirInode);
+				copyDirInode(inodes[dirInode.blocks[i] -1], inodes[createdDirInode.number - 1]);
 				actualInode = createInode;
 			}
 			else{
@@ -487,11 +428,11 @@ void copyDirInode(Inode dirInode, Inode createInode){
 				params[0] = inodes[dirInode.blocks[i] - 1].name;
 				definedCreateInode = actualDirInode.number;
 				copy();
-				actualInode = createInode;
-				cout << "FAZ O ARQUIVO" << endl;
+				//actualInode = actualDirInode;
+				//cout << "FAZ O ARQUIVO" << endl;
 			}
 		}
 	}
-	cout << "PAREI AQUI!! \n\n"<< endl;
+	//cout << "PAREI AQUI!! \n\n"<< endl;
 }
 #endif

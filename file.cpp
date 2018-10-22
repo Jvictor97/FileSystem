@@ -336,7 +336,7 @@ void copy(){
         else
             if(blankBlock == -1)
                 blankBlock = aux; // Seleciona o bloco do inode Pasta em que o inode de arquivo será gravado        
-    }  
+    }
 
     if(blankBlock == -1){
         cout<<RED<<"\nERRO: Numero máximo de blocos de endereco utilizado...\n"<<RESET;
