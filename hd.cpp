@@ -191,6 +191,7 @@ void selecionaHD(){
     localMap["move"] = move;
     localMap["copydir"] = copydir;
     localMap["removedir"] = removedir;
+    localMap["movedir"] = movedir;
     // FIM DA ÁREA DE MAPEAMENTO
 
     hd = fopen(nomeHD.c_str(), "r+");

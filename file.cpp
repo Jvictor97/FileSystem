@@ -118,7 +118,7 @@ void removeFile(){
 				}
                 superBlock.numFreeBlocks += amtBlocks;
 				inodes[child.number - 1].initialize();
-                if(!movingFile)
+                if(!movingFile && !movingDir)
 			    	cout<<GREEN<<"\nArquivo \""<<YELLOW<<filename<<GREEN<<"\" removido com sucesso!\n\n";
 				return;
 			}
