@@ -192,6 +192,7 @@ void selecionaHD(){
     localMap["copydir"] = copydir;
     localMap["removedir"] = removedir;
     localMap["movedir"] = movedir;
+    localMap["copyfrom"] = copyfrom;
     // FIM DA ÁREA DE MAPEAMENTO
 
     hd = fopen(nomeHD.c_str(), "r+");
@@ -286,8 +287,10 @@ void selecionaHD(){
 
         if(cmd == "")
             printf("");
-        else if(localMap.find(cmd.c_str()) == localMap.end())
+        else if(localMap.find(cmd.c_str()) == localMap.end()){
             cout<<RED<<"\nERRO: Esta funcao nao existe...\n\n"<<RESET;
+            cmd = "";
+        }
         else{
             localMap[cmd]();
             cmd = cmd != "exit" ? "" : "exitHD";
