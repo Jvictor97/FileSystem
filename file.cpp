@@ -118,7 +118,7 @@ void removeFile(){
 				}
                 superBlock.numFreeBlocks += amtBlocks;
 				inodes[child.number - 1].initialize();
-                if(!movingFile)
+                if(!movingFile && !movingDir)
 			    	cout<<GREEN<<"\nArquivo \""<<YELLOW<<filename<<GREEN<<"\" removido com sucesso!\n\n";
 				return;
 			}
@@ -336,7 +336,7 @@ void copy(){
         else
             if(blankBlock == -1)
                 blankBlock = aux; // Seleciona o bloco do inode Pasta em que o inode de arquivo será gravado        
-    }  
+    }
 
     if(blankBlock == -1){
         cout<<RED<<"\nERRO: Numero máximo de blocos de endereco utilizado...\n"<<RESET;
@@ -409,6 +409,51 @@ void move(){
 
     cout<<GREEN<<"\nArquivo \""<<YELLOW<<params[0]<<GREEN"\" movido com sucesso!\n\n"<<RESET;
     movingFile = false;
+}
+
+void copyfrom(){
+    string fileName = params[0];
+    string realHdPath = params[1];
+    int fileInode;
+
+    for (int i = 0; i < 7; i++)
+    {
+        if(actualInode.blocks[i] != 0)
+        {
+            Inode child = inodes[actualInode.blocks[i] - 1];
+
+            if(child.flag == 1 
+            && child.type == 2 
+            && strcmp(child.name, fileName.c_str()) == 0 
+            && child.father_inode == actualInode.number)
+            {
+                // Concatena todo o conteúdo do arquivo original
+                string content;
+                for (int n = 0; n < 7; n++)
+                {
+                    if(child.blocks[n] != 0)
+                    {
+                        //cout<<datablocks[child.blocks[n] - superBlock.firstDataBlock];
+                        content += datablocks[child.blocks[n] - superBlock.firstDataBlock];
+                    }
+                }
+                FILE * realFile = fopen(realHdPath.c_str(), "w");
+
+                char * contentC = (char*)malloc(sizeof(char) * strlen(content.c_str()));
+
+                strcpy(contentC, content.c_str());
+
+                fwrite(contentC, strlen(contentC), 1, realFile);
+
+                fclose(realFile);
+                free(contentC);
+                cout<<GREEN<<"\nArquivo \""<<YELLOW<<fileName<<GREEN<<"\" transferido com sucesso!\n\n";
+                return;
+            }
+        }
+    }
+
+    cout<<RED<<"\nERRO: o arquivo \""<<YELLOW<<params[0]<<RED<<"\" nao foi localizado.\n\n";
 }
 
 #endif
