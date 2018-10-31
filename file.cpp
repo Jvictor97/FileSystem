@@ -411,6 +411,7 @@ void move(){
     movingFile = false;
 }
 
+<<<<<<< Updated upstream
 void copyfrom(){
     string fileName = params[0];
     string realHdPath = params[1];
@@ -456,4 +457,14 @@ void copyfrom(){
     cout<<RED<<"\nERRO: o arquivo \""<<YELLOW<<params[0]<<RED<<"\" nao foi localizado.\n\n";
 }
 
+=======
+void copyto(){
+
+    string name = params[0];
+    string newName = params[1];
+
+    FILE* fileFromHD = fopen(params.c_str, 'r');
+    
+}
+>>>>>>> Stashed changes
 #endif

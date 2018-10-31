@@ -407,8 +407,14 @@ void copyDirInode(Inode dirInode, Inode createInode){
 				params[0] = inodes[dirInode.blocks[i] - 1].name;
 				definedCreateInode = actualDirInode.number;
 				copy();
+<<<<<<< Updated upstream
 				//actualInode = actualDirInode;
 				//cout << "FAZ O ARQUIVO" << endl;
+=======
+				actualInode = createInode;
+				params[0] = dirInode.name;
+				cout << "FAZ O ARQUIVO" << endl;
+>>>>>>> Stashed changes
 			}
 		}
 	}
