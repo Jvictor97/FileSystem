@@ -360,11 +360,7 @@ void copydir(){
 
     // Guarda conteúdo os Inodes que são filhos de diretorio
     Inode dirInode = inodes[fileInode - 1];
-<<<<<<< HEAD
-    cout<<"Nome dir: "<<dirInode.name<<endl;
-=======
     //cout<<"Nome arquivo: "<<dirInode.name<<endl;
->>>>>>> d5f07b52b6576f285e39d983b023ab962c0cc018
 
 	Inode saveActual = actualInode;
 
@@ -373,14 +369,11 @@ void copydir(){
 	copyDirInode(dirInode, createInode);
 
 	actualInode = saveActual;
-<<<<<<< HEAD
-=======
 
 	if(!movingDir)
 		cout<<GREEN<<"\nDiretorio \""<<YELLOW<<curName<<GREEN<<"\" copiado com sucesso!\n\n";
 
 	copyingDir = false;
->>>>>>> d5f07b52b6576f285e39d983b023ab962c0cc018
 	return;
 }
 
@@ -407,14 +400,8 @@ void copyDirInode(Inode dirInode, Inode createInode){
 				params[0] = inodes[dirInode.blocks[i] - 1].name;
 				definedCreateInode = actualDirInode.number;
 				copy();
-<<<<<<< Updated upstream
 				//actualInode = actualDirInode;
 				//cout << "FAZ O ARQUIVO" << endl;
-=======
-				actualInode = createInode;
-				params[0] = dirInode.name;
-				cout << "FAZ O ARQUIVO" << endl;
->>>>>>> Stashed changes
 			}
 		}
 	}
