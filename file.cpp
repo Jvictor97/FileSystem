@@ -456,4 +456,108 @@ void copyfrom(){
     cout<<RED<<"\nERRO: o arquivo \""<<YELLOW<<params[0]<<RED<<"\" nao foi localizado.\n\n";
 }
 
+void copyto(){
+
+    string hdPath = params[0];
+    string newName = params[1];
+
+    FILE* fileFromHD = fopen(hdPath.c_str(), "r");
+    size_t result;
+    int fileSize = 0;
+
+    fseek(fileFromHD, 0, SEEK_END); // Coloca a o ponteiro dentro do arquivo na ultima posição.
+    fileSize = ftell(fileFromHD);   // Encontra o tamanho do arquivo
+    rewind(fileFromHD);             // Volta o ponteiro para a posicao inicial
+
+
+    //TODO: Validar se o arquivo cabe no HD (total do tamanho do HD)
+    double myFileSize = ceil((double)fileSize / (double)sizeBlock);
+
+    if(superBlock.numFreeBlocks < myFileSize ){
+        cout << "ERRO O ARQUIVO NAO CABE NO HD!!" << endl;
+        return;
+    }
+
+    printf("%d\n", fileSize);
+    printf("%d\n", fileSize / sizeBlock);
+
+
+    //TODO: Validar se o arquivo cabe em um inode
+    if( (fileSize / sizeBlock) > 7){
+        cout << "ERRO O ARQUIVO NAO CABE NO INODE" << endl;
+        return;
+    }
+
+
+
+    int i;
+    // Encontra o proximo Inode disponivel
+    for(i = 0; i < totalInodes && inodes[i].flag != 0; i++);
+
+
+    
+
+    if(i == totalInodes){
+        cout << "ERRO TODOS INODES UTILIZADOS" << endl;
+        return;
+    }
+
+
+    // Cria um buffer com o tamanho do arquivo
+    char *contentChar = (char*)malloc(sizeof(char) * fileSize);
+
+
+    result = fread(contentChar, 1, fileSize, fileFromHD);
+
+
+    string content = contentChar;
+
+    cout <<"CONTEUDO: " << content << endl;
+
+    if(result != fileSize){ cout << "ERRO NO TAMANHO DO ARQUIVO" << endl; }
+
+
+    int amtBlocks = ceil((double)content.size() / (double)superBlock.blockSize);
+
+
+    int actual;
+	for(actual = 0; actualInode.blocks[actual] != 0; actual++){
+		if(actual > 6){
+			cout<<RED<<"\nERRO: Numero máximo de blocos de endereco utilizado...\n"<<RESET;
+			cout<<YELLOW<<"Dica: Apague algum arquivo/diretorio ou formate seu HD para liberar espaco!\n\n"<<RESET;
+            inodes[i].initialize();
+			return;
+		}
+	}
+
+    inodes[actualInode.number - 1].blocks[actual] = actualInode.blocks[actual] = inodes[i].number;
+
+    int j, k;
+
+    // Encontra o proximo DataBlock disponivel
+    for(j = 0; j < amtBlocks; j++){
+        for(k = 0; bitmapDataBlocks.bitMapArray[k] && k < numDataBlocks; k++);
+            bitmapDataBlocks.bitMapArray[k] = 1;
+            inodes[i].blocks[j] = k + superBlock.firstDataBlock;
+    }
+
+    for(j = 0; j < amtBlocks; j++){
+        strncpy(datablocks[inodes[i].blocks[j] - superBlock.firstDataBlock], content.substr(0,sizeBlock).c_str(), sizeBlock);
+        if(content.size() > sizeBlock)
+            content = content.substr(sizeBlock);
+    } 
+
+    // Seta o inode com suas flags essenciais
+    inodes[i].flag = 1;
+    inodes[i].type = 2;
+    inodes[i].father_inode = actualInode.number;
+    
+
+    strcpy(inodes[i].name, newName.c_str());  
+
+    superBlock.numFreeBlocks -= amtBlocks;
+
+    free(contentChar);
+
+}
 #endif

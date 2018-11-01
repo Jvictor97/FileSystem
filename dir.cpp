@@ -326,9 +326,9 @@ void copydir(){
 	    Inode createInode = searchInode;
 
 		if(actualInode.number == createInode.number && curName == newName) {
-        cout<<RED<<"\nERRO: o arquivo não pode ser copiado com o mesmo nome para o mesmo caminho.\n\n";
-        return;
-    }
+			cout<<RED<<"\nERRO: o arquivo não pode ser copiado com o mesmo nome para o mesmo caminho.\n\n";
+			return;
+    	}
 
     // printf("Nome do arquivo: %s\n", inodes[fileInode - 1].name);
     // printf("Nome pasta: %s\n", searchInode.name);
