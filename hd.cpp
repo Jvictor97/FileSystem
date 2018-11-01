@@ -186,6 +186,7 @@ void selecionaHD(){
     // Entrega 2:
     localMap["rename"] = rename;
     localMap["copy"] = copy;
+    localMap["?"] = help;
     localMap["help"] = help;
     localMap["renamedir"] = renamedir;
     localMap["move"] = move;
@@ -323,6 +324,11 @@ void writeSuperBlock(){
 
     // Número de blocos livres = número de datablocks
     superBlock.numFreeBlocks = numBlocks - 1 - inodeBlocks - bitmapBlocks;
+
+    // printf("Total: %d\n", numBlocks);
+    // printf("InodeBlocks: %d\n", inodeBlocks);
+    // printf("bitmapBlocks: %d\n", bitmapBlocks);
+    // printf("Free: %d\n", superBlock.numFreeBlocks);
 
     fflush(stdin);
     fwrite(&(superBlock), sizeof(SuperBlock), 1, hd);

@@ -4,59 +4,44 @@
 #include <cstdlib>
 #include <string>
 
+#define RED     "\x1b[31m"
+#define GREEN   "\x1b[32m"
+#define YELLOW  "\x1b[33m"
+#define BLUE    "\x1b[34m"
+#define MAGENTA "\x1b[35m"
+#define CYAN    "\x1b[36m"
+#define RESET   "\x1b[0m"
+
 using namespace std;
 
 void help(){
-		cout<<" Comandos e Funcionalidades\n\n\n"<<endl;
-		
-		cout<<"ARQUIVO - create [arquivo] \nCriar struct do I-Node de arquivo.\n"<<endl;
+    printf(YELLOW "%-60s %-30s\n" RESET, "Comandos", "Funcionalidades");
 
-  		cout<<"ARQUIVO - copy [nome] [novo nome]\nCopia um arquivo do diretorio atual cujo nome seja [nome] para o path especificado por [novo nome]\n"<<endl;
-
-    	cout<<"ARQUIVO - copyfrom [nome] [novo nome]\nCopia um arquivo do HD virtual para o HD real\n"<<endl;
-
-   		cout<<"ARQUIVO - copyto [nome] [novo nome]\nCopia um arquivo do HD real para o HD virtual\n"<<endl;
-
-   		cout<<"ARQUIVO - move [origem] [destino]\nMove o arquivo especificado pelo path [origem] para o path [destino]\n"<<endl;
-
-   		cout<<"ARQUIVO - rename [nome] [novo nome \nRenomeia o arquivo especificado pelo nome [nome] com o conteudo de [novo nome]\n"<<endl;
-
-   		cout<<"ARQUIVO - remove [arquivo]\nDeleta um arquivo do HD selecionado\n"<<endl;
-    
-   		cout<<"ARQUIVO - type [arquivo]\nExibe o conteudo do arquivo na linha de comando (semelhante ao comando 'cat' do linux)\n"<<endl;
-
-   		cout<<"HD - [nome do HD]:\nSeleciona um HD e copia todo o seu conteudo para a memoria permitindo manipulacao\n"<<endl;
-
-   		cout<<"HD - createhd [nome do hd] [tamanho do bloco] [qtde de blocos]\nCria um novo HD ja formatado para uso\n"<<endl;
-
-    	cout<<"HD - dirhd\nExibe a lista de todos os HDs ja criados\n"<<endl;
-
-    	cout<<"HD - formathd [nome do hd]\nLimpa todo o conteudo do HD e reinicializa o superblock, o header de bitmap, seus inodes e datablocks\n"<<endl;
-
-    	cout<<"HD - removehd [nome do hd]\nExclui um HD do sistema\n"<<endl;
-
-    	cout<<"HD - statushd [nome do hd]\nExibe propriedades do filesystem como espa�o utilizado e disponivel\n"<<endl;
-   
-    	cout<<"HD - typehd [nome do hd]\nColeta informacoes dos blocos de dados validos no HD e exibe na tela o conteudo em codificacao char e byte\n"<<endl;
-
-    	cout<<"PASTAS - cd [nome da pasta]\nSeleciona um diretorio especifico e carrega na memoria todos os metadados do mesmo\n"<<endl;
-
-    	cout<<"PASTAS - copydir [origem] [destino]\nCopia um diretorio e todos os seus sub-itens recursivamente de [origem] para [destino]\n"<<endl;
-
-    	cout<<"PASTAS - createdir [nome da pasta]\nCria um novo diretorio no sistema de arquivos\n"<<endl;
-
-    	cout<<"PASTAS - dir [nome da pasta]\nExibe todo o conteudo (arquivos e subdirs) de um diretorio bem como seus metadados\n"<<endl;
-
-    	cout<<"PASTAS - movedir [origem] [destino]\nEste comando nao permite mover uma pasta para o mesmo diretorio\n"<<endl;
-
-    	cout<<"PASTAS - removedir [nome da pasta]\nCria um novo diretorio no sistema de arquivos\n"<<endl;
-
-    	cout<<"PASTAS - renamedir [nome] [novo nome]\nRenomeia o diretorio especificado por [nome] utilizando o conteudo de [novo nome]\n"<<endl;
-   
-		cout<<"help ou ?\n Ajuda\n"<<endl;
-	 
-	 	cout<<"exit\nSair\n\n\n\n"<<endl;
-  
+    printf(RESET "%-60s %-30s\n" RESET, "create [arquivo]", "Cria struct do I-Node de arquivo.");
+    printf(RESET "%-60s %-30s\n" RESET, "copy [nome] [novo nome]", "Copia um arquivo do diretorio atual cujo nome seja [nome] para o path especificado por [novo nome]");
+    printf(RESET "%-60s %-30s\n" RESET, "copyfrom [nome] [novo nome]", "Copia um arquivo do HD virtual para o HD real");
+    printf(RESET "%-60s %-30s\n" RESET, "copyto [nome] [novo nome]", "Copia um arquivo do HD real para o HD virtual");
+    printf(RESET "%-60s %-30s\n" RESET, "move [origem] [destino]", "Move o arquivo especificado pelo path [origem] para o path [destino]");
+    printf(RESET "%-60s %-30s\n" RESET, "rename [nome] [novo nome]", "Renomeia o arquivo especificado pelo nome [nome] com o conteudo de [novo nome]");
+    printf(RESET "%-60s %-30s\n" RESET, "remove [arquivo]", "Deleta um arquivo do HD selecionado");
+    printf(RESET "%-60s %-30s\n" RESET, "type [arquivo]", "Exibe o conteudo do arquivo na linha de comando (semelhante ao comando 'cat' do linux)");
+    printf(RESET "%-60s %-30s\n" RESET, "[nome do HD]", "Seleciona um HD e copia todo o seu conteudo para a memoria permitindo manipulacao");
+    printf(RESET "%-60s %-30s\n" RESET, "createhd [nome do hd] [tamanho do bloco] [qtde de blocos]", "Cria um novo HD ja formatado para uso");
+    printf(RESET "%-60s %-30s\n" RESET, "dirhd", "Exibe a lista de todos os HDs ja criados");
+    printf(RESET "%-60s %-30s\n" RESET, "formathd [nome do hd]", "Limpa todo o conteudo do HD e reinicializa o superblock, o header de bitmap, seus inodes e datablocks");
+    printf(RESET "%-60s %-30s\n" RESET, "removehd [nome do hd]", "Exclui um HD do sistema");
+    printf(RESET "%-60s %-30s\n" RESET, "statushd [nome do hd]", "Exibe propriedades do filesystem como espaco utilizado e disponivel");
+    printf(RESET "%-60s %-30s\n" RESET, "typehd [nome do hd]", "Coleta informacoes dos blocos de dados validos no HD e exibe na tela o conteudo em codificacao char e byte");
+    printf(RESET "%-60s %-30s\n" RESET, "cd [nome da pasta]", "Seleciona um diretorio especifico e carrega na memoria todos os metadados do mesmo");
+    printf(RESET "%-60s %-30s\n" RESET, "copydir [origem] [destino]", "Copia um diretorio e todos os seus sub-itens recursivamente de [origem] para [destino]");
+    printf(RESET "%-60s %-30s\n" RESET, "createdir [nome da pasta]", "Cria um novo diretorio no sistema de arquivos");
+    printf(RESET "%-60s %-30s\n" RESET, "dir [nome da pasta]", "Exibe todo o conteudo (arquivos e subdirs) de um diretorio bem como seus metadados");
+    printf(RESET "%-60s %-30s\n" RESET, "movedir [origem] [destino]", "Este comando nao permite mover uma pasta para o mesmo diretorio");
+    printf(RESET "%-60s %-30s\n" RESET, "removedir [nome da pasta]", "Cria um novo diretorio no sistema de arquivos");
+    printf(RESET "%-60s %-30s\n" RESET, "renamedir [nome] [novo nome]", "Renomeia o diretorio especificado por [nome] utilizando o conteudo de [novo nome]");
+    printf(RESET "%-60s %-30s\n" RESET, "help ou ?", "Mostra os comandos do sistema e suas funcionalidades");
+    printf(RESET "%-60s %-30s\n" RESET, "exit", "sai do sistema");
+		  
 }
 
 #endif
