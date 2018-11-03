@@ -203,7 +203,8 @@ void selecionaHD(){
 		cout<<RED<<"ERRO: Nenhum HD encontrado com este nome...\n"<<RESET;
 		return;
 	}
-
+    fflush(hd);
+    fflush(stdin);
     fread(&superBlock, sizeof(SuperBlock), 1, hd);
 
     // REMOVER PRINT SUPERBLOCK
@@ -228,7 +229,8 @@ void selecionaHD(){
     inodes = (Inode *) malloc(sizeof(Inode) * inodesPerBlock * inodeBlocks);
 
     int space = sizeBlock;
-
+    fflush(hd);
+    fflush(stdin);
     for(int i = 0; i < totalInodes; i++){
         if(space < sizeof(Inode)){
             fseek(hd, space, SEEK_CUR);
@@ -255,7 +257,8 @@ void selecionaHD(){
     numDataBlocks = numBlocks - 1 - inodeBlocks - bitmapBlocks;
     // Inicializa a variável global de bitmap
     bitmapDataBlocks.setSize(numDataBlocks);
-
+    fflush(hd);
+    fflush(stdin);
     // Lê do arquivo para a variável o bitmap
     fread(bitmapDataBlocks.bitMapArray, sizeof(bool), numDataBlocks, hd); 
 
@@ -268,10 +271,11 @@ void selecionaHD(){
     fseek(hd, offsetDataBlock, SEEK_SET);
 
     datablocks = (char**) malloc(sizeof(char*) * numDataBlocks);
-
+    fflush(hd);
+    fflush(stdin);
     for(int i = 0; i < numDataBlocks; i++){
         datablocks[i] = (char*) malloc(sizeof(char) * sizeBlock);
-        fread(datablocks[i], sizeBlock, 1, hd);
+        fread(datablocks[i], 1, sizeBlock, hd);
     }
     
     // REMOVER PRINT DATABLOCKS:
@@ -526,7 +530,7 @@ void exitHD(){
 
     free(datablocks);
 
-    cout<<GREEN<<"\nO HD \""<<nomeHD<<"\" foi salvo com sucesso!"<<RESET<<endl<<endl;
+    cout<<GREEN<<"\nO HD \""<<YELLOW<<nomeHD<<GREEN<<"\" foi salvo com sucesso!"<<RESET<<endl<<endl;
 }
 
 void getclause(){

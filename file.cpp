@@ -426,28 +426,66 @@ void copyfrom(){
             && child.type == 2 
             && strcmp(child.name, fileName.c_str()) == 0 
             && child.father_inode == actualInode.number)
-            {
-                // Concatena todo o conteúdo do arquivo original
-                string content;
-                for (int n = 0; n < 7; n++)
+            { 
+                // Se for uma imagem
+                if(params[1].rfind(".jpg") != -1 
+                || params[1].rfind(".jpeg") != -1 
+                || params[1].rfind(".png") != -1 
+                || params[1].rfind(".bmp") != -1 )
                 {
-                    if(child.blocks[n] != 0)
-                    {
-                        //cout<<datablocks[child.blocks[n] - superBlock.firstDataBlock];
-                        content += datablocks[child.blocks[n] - superBlock.firstDataBlock];
+                    int con;
+                    con = datablocks[child.blocks[0] - superBlock.firstDataBlock][i] - '0';
+                    for(int i = 1; i < 24; i++){
+                        con = (datablocks[child.blocks[0] - superBlock.firstDataBlock][i] - '0') + (con * 10);
                     }
+                    int fileSize = con;
+                    int amtRed = 24;
+                    int it = 0;
+                    char * imgContent = (char*) malloc(sizeof(char) * fileSize);
+                   
+                    for (int n = 0; n < 7; n++)
+                    {
+                        if(child.blocks[n] != 0)
+                        {
+                            while(amtRed < sizeBlock && it < fileSize){
+                                imgContent[it] = datablocks[child.blocks[n] - superBlock.firstDataBlock][amtRed];
+                                amtRed++;
+                                it++;
+                            }
+                            amtRed = 0;
+                        }
+                    }
+
+                    FILE * realFile = fopen(realHdPath.c_str(), "wb");
+                    fwrite(imgContent, 1, fileSize, realFile);
+
+                    fclose(realFile);
+                    free(imgContent);
                 }
-                FILE * realFile = fopen(realHdPath.c_str(), "w");
+                else{ // Caso seja um arquivo de texto
+                    // Concatena todo o conteúdo do arquivo original
+                    string content;
+                    for (int n = 0; n < 7; n++)
+                    {
+                        if(child.blocks[n] != 0)
+                        {
+                            //cout<<datablocks[child.blocks[n] - superBlock.firstDataBlock];
+                            content += datablocks[child.blocks[n] - superBlock.firstDataBlock];
+                        }
+                    }
+                    FILE * realFile = fopen(realHdPath.c_str(), "w+b");
 
-                char * contentC = (char*)malloc(sizeof(char) * strlen(content.c_str()));
+                    char * contentC = (char*)malloc(sizeof(char) * strlen(content.c_str()));
 
-                strcpy(contentC, content.c_str());
+                    strcpy(contentC, content.c_str());
 
-                fwrite(contentC, strlen(contentC), 1, realFile);
+                    fwrite(contentC, 1, strlen(contentC), realFile);
 
-                fclose(realFile);
-                free(contentC);
-                cout<<GREEN<<"\nArquivo \""<<YELLOW<<fileName<<GREEN<<"\" transferido com sucesso!\n\n";
+                    fclose(realFile);
+                    free(contentC);
+                }
+                
+                cout<<GREEN<<"\nArquivo \""<<YELLOW<<fileName<<GREEN<<"\" transferido com sucesso para: \""<<YELLOW<<realHdPath<<GREEN"\".\n\n";
                 return;
             }
         }
@@ -461,14 +499,15 @@ void copyto(){
     string hdPath = params[0];
     string newName = params[1];
 
-    FILE* fileFromHD = fopen(hdPath.c_str(), "r");
+    FILE* fileFromHD = fopen(hdPath.c_str(), "r+b");
+    fflush(fileFromHD);
+    fflush(stdin);
     size_t result;
     int fileSize = 0;
 
     fseek(fileFromHD, 0, SEEK_END); // Coloca a o ponteiro dentro do arquivo na ultima posição.
     fileSize = ftell(fileFromHD);   // Encontra o tamanho do arquivo
     rewind(fileFromHD);             // Volta o ponteiro para a posicao inicial
-
 
     //TODO: Validar se o arquivo cabe no HD (total do tamanho do HD)
     double myFileSize = ceil((double)fileSize / (double)sizeBlock);
@@ -478,9 +517,8 @@ void copyto(){
         return;
     }
 
-    printf("%d\n", fileSize);
-    printf("%d\n", fileSize / sizeBlock);
-
+    //printf("%d\n", fileSize);
+    //printf("%d\n", fileSize / sizeBlock);
 
     //TODO: Validar se o arquivo cabe em um inode
     if( (fileSize / sizeBlock) > 7){
@@ -488,37 +526,46 @@ void copyto(){
         return;
     }
 
-
-
     int i;
     // Encontra o proximo Inode disponivel
     for(i = 0; i < totalInodes && inodes[i].flag != 0; i++);
-
-
-    
 
     if(i == totalInodes){
         cout << "ERRO TODOS INODES UTILIZADOS" << endl;
         return;
     }
 
-
     // Cria um buffer com o tamanho do arquivo
     char *contentChar = (char*)malloc(sizeof(char) * fileSize);
+    //char contentChar[20000];
 
+    if(fileFromHD == NULL){
+        cout<< "ERRO NAO ABRIU" << endl;
+        return;
+    }
 
     result = fread(contentChar, 1, fileSize, fileFromHD);
+    fclose(fileFromHD);
 
+    if(result != fileSize){
+        cout << "ERRO NO TAMANHO DO ARQUIVO" << endl; 
+        return;
+    }
 
-    string content = contentChar;
+    //string path= "c:/users/joao.souza/desktop/P/amazon.png";
+    // FILE * fout = fopen(path.c_str(), "wb");
+    
+    // fwrite(contentChar, 1, fileSize, fout);
+    // fclose(fout);
+    // return;
 
-    cout <<"CONTEUDO: " << content << endl;
+    //string content = contentChar;
 
-    if(result != fileSize){ cout << "ERRO NO TAMANHO DO ARQUIVO" << endl; }
+    //cout <<"CONTEUDO: " << content << endl;
+    //cout<<"Red Bytes: " <<result<<endl;
+    //cout<<"Size do arq: "<<fileSize<<endl;
 
-
-    int amtBlocks = ceil((double)content.size() / (double)superBlock.blockSize);
-
+    int amtBlocks = ceil((double)(fileSize + 24)/ (double)superBlock.blockSize);
 
     int actual;
 	for(actual = 0; actualInode.blocks[actual] != 0; actual++){
@@ -541,23 +588,50 @@ void copyto(){
             inodes[i].blocks[j] = k + superBlock.firstDataBlock;
     }
 
-    for(j = 0; j < amtBlocks; j++){
-        strncpy(datablocks[inodes[i].blocks[j] - superBlock.firstDataBlock], content.substr(0,sizeBlock).c_str(), sizeBlock);
-        if(content.size() > sizeBlock)
-            content = content.substr(sizeBlock);
+    int it = 0;
+    int amtWrote = 0;
+
+    if(params[0].rfind(".jpg") != -1 
+    || params[0].rfind(".jpeg") != -1 
+    || params[0].rfind(".png") != -1 
+    || params[0].rfind(".bmp") != -1 )
+    {
+        string strFileSize = to_string(fileSize);
+        size_t len = strFileSize.size();
+        while(len < 24){
+            strFileSize.insert(0, "0");
+            len++;
+        }
+        while(amtWrote < 24){
+            datablocks[inodes[i].blocks[0] - superBlock.firstDataBlock][amtWrote] = strFileSize[amtWrote];
+            amtWrote++;
+        }
+    }
+
+    for(j = 0; j < amtBlocks; j++){      
+        while(amtWrote < sizeBlock && it < fileSize){
+            datablocks[inodes[i].blocks[j] - superBlock.firstDataBlock][amtWrote] = contentChar[it];
+            amtWrote++;
+            it++;
+        }
+        amtWrote = 0;
+        // strncpy(datablocks[inodes[i].blocks[j] - superBlock.firstDataBlock], content.substr(0,sizeBlock).c_str(), sizeBlock);
+        // if(content.size() > sizeBlock)
+        //     content = content.substr(sizeBlock);
     } 
+
+    //cout<<"\nIterador: "<<it<<endl;
 
     // Seta o inode com suas flags essenciais
     inodes[i].flag = 1;
     inodes[i].type = 2;
     inodes[i].father_inode = actualInode.number;
     
-
     strcpy(inodes[i].name, newName.c_str());  
 
     superBlock.numFreeBlocks -= amtBlocks;
 
-    free(contentChar);
-
+    // free(contentChar);
+    cout<<GREEN<<"\nArquivo \""<<YELLOW<<params[0].substr(params[0].rfind('/') + 1)<<GREEN<<"\" criado com sucesso no HD virtual como \""<<YELLOW<<params[1]<<GREEN"\".\n\n";
 }
 #endif
