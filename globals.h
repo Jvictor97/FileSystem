@@ -28,6 +28,6 @@ extern Config config;
 extern Config hdList[20];
 extern Inode actualInode;
 extern string location;
-
-
+extern int definedCreateInode;
+extern bool movingDir;
 #endif

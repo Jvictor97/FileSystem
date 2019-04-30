@@ -171,16 +171,30 @@ void createhd()
 }
 
 void selecionaHD(){
+    definedCreateInode = -1;
     // ÁREA DE MAPEAMENTO DE FUNÇÕES DE ESCOPO DO HD
 	map<std::string, functions> localMap;
+    // Entrega 1:
     localMap["createdir"] = createdir;
     localMap["cd"] = cd;
     localMap["dir"] = dir;
     localMap["create"] = create;
     localMap["remove"] = removeFile;
     localMap["type"] = type;
-    localMap["help"] = help;
 	localMap["exit"] = exitHD;
+
+    // Entrega 2:
+    localMap["rename"] = rename;
+    localMap["copy"] = copy;
+    localMap["?"] = help;
+    localMap["help"] = help;
+    localMap["renamedir"] = renamedir;
+    localMap["move"] = move;
+    localMap["copydir"] = copydir;
+    localMap["removedir"] = removedir;
+    localMap["movedir"] = movedir;
+    localMap["copyfrom"] = copyfrom;
+    localMap["copyto"] = copyto;
     // FIM DA ÁREA DE MAPEAMENTO
 
     hd = fopen(nomeHD.c_str(), "r+");
@@ -189,7 +203,8 @@ void selecionaHD(){
 		cout<<RED<<"ERRO: Nenhum HD encontrado com este nome...\n"<<RESET;
 		return;
 	}
-
+    fflush(hd);
+    fflush(stdin);
     fread(&superBlock, sizeof(SuperBlock), 1, hd);
 
     // REMOVER PRINT SUPERBLOCK
@@ -214,7 +229,8 @@ void selecionaHD(){
     inodes = (Inode *) malloc(sizeof(Inode) * inodesPerBlock * inodeBlocks);
 
     int space = sizeBlock;
-
+    fflush(hd);
+    fflush(stdin);
     for(int i = 0; i < totalInodes; i++){
         if(space < sizeof(Inode)){
             fseek(hd, space, SEEK_CUR);
@@ -241,7 +257,8 @@ void selecionaHD(){
     numDataBlocks = numBlocks - 1 - inodeBlocks - bitmapBlocks;
     // Inicializa a variável global de bitmap
     bitmapDataBlocks.setSize(numDataBlocks);
-
+    fflush(hd);
+    fflush(stdin);
     // Lê do arquivo para a variável o bitmap
     fread(bitmapDataBlocks.bitMapArray, sizeof(bool), numDataBlocks, hd); 
 
@@ -254,10 +271,11 @@ void selecionaHD(){
     fseek(hd, offsetDataBlock, SEEK_SET);
 
     datablocks = (char**) malloc(sizeof(char*) * numDataBlocks);
-
+    fflush(hd);
+    fflush(stdin);
     for(int i = 0; i < numDataBlocks; i++){
         datablocks[i] = (char*) malloc(sizeof(char) * sizeBlock);
-        fread(datablocks[i], sizeBlock, 1, hd);
+        fread(datablocks[i], 1, sizeBlock, hd);
     }
     
     // REMOVER PRINT DATABLOCKS:
@@ -275,8 +293,10 @@ void selecionaHD(){
 
         if(cmd == "")
             printf("");
-        else if(localMap.find(cmd.c_str()) == localMap.end())
-            cout<<RED"ERRO: Esta funcao nao existe...\n"<<RESET;
+        else if(localMap.find(cmd.c_str()) == localMap.end()){
+            cout<<RED<<"\nERRO: Esta funcao nao existe...\n\n"<<RESET;
+            cmd = "";
+        }
         else{
             localMap[cmd]();
             cmd = cmd != "exit" ? "" : "exitHD";
@@ -309,6 +329,11 @@ void writeSuperBlock(){
 
     // Número de blocos livres = número de datablocks
     superBlock.numFreeBlocks = numBlocks - 1 - inodeBlocks - bitmapBlocks;
+
+    // printf("Total: %d\n", numBlocks);
+    // printf("InodeBlocks: %d\n", inodeBlocks);
+    // printf("bitmapBlocks: %d\n", bitmapBlocks);
+    // printf("Free: %d\n", superBlock.numFreeBlocks);
 
     fflush(stdin);
     fwrite(&(superBlock), sizeof(SuperBlock), 1, hd);
@@ -505,7 +530,7 @@ void exitHD(){
 
     free(datablocks);
 
-    cout<<GREEN<<"\nO HD \""<<nomeHD<<"\" foi salvo com sucesso!"<<RESET<<endl<<endl;
+    cout<<GREEN<<"\nO HD \""<<YELLOW<<nomeHD<<GREEN<<"\" foi salvo com sucesso!"<<RESET<<endl<<endl;
 }
 
 void getclause(){
@@ -678,6 +703,86 @@ void printDataBlocks(){
         }
         printf("\n");
     }
+}
+
+void removehd(){
+    nomeHD = params[0];
+
+    configFile = fopen(".config", "r");
+
+    if(configFile == NULL){
+        cout<<RED<<"\nERRO: nao encontrado arquivo .config, caso algum HD exista o sistema esta corrompido!\n\n"<<RESET;
+        return;
+    }
+
+    fread(hdList, sizeof(Config), 20, configFile);
+    fclose(configFile);
+
+    int i;
+    for(i = 0; i < 20 && hdList[i].nomeHD != nomeHD; i++);
+
+    if(hdList[i].nomeHD != nomeHD){
+        cout<<RED<<"\nERRO: nenhum HD encontrado com o nome \""<<YELLOW<<nomeHD<<RED<<"\".\n\n"<<RESET;
+        return;
+    }
+
+    for(int j = i; j < 19; j++){
+        hdList[j] = hdList[j + 1];
+    }
+
+    configFile = fopen(".config", "w");
+    fwrite(hdList, sizeof(Config), 20, configFile);
+
+    string simpleHDname = nomeHD;
+
+    nomeHD += ".mvpfs";
+
+    remove(nomeHD.c_str());
+
+    cout<<GREEN<<"\nO HD \""<<YELLOW<<simpleHDname<<GREEN<<"\" foi removido com sucesso!\n\n"<<RESET;
+}
+
+void statushd(){
+    string simpleHDname = params[0];
+    nomeHD = params[0] + ".mvpfs";
+    hd = fopen(nomeHD.c_str(), "r");
+
+    fread(&superBlock, sizeof(SuperBlock), 1, hd);
+
+    numBlocks = superBlock.numBlocks;
+    sizeBlock = superBlock.blockSize;
+    inodeBlocks = superBlock.numInodeBlocks;
+
+    int offsetInodeBlock = superBlock.firstInodeBlock * sizeBlock;
+
+    fseek(hd, offsetInodeBlock, SEEK_SET);
+
+    inodesPerBlock = floor(sizeBlock / sizeof(Inode));
+
+    totalInodes = inodesPerBlock * inodeBlocks;
+    
+    inodes = (Inode *) malloc(sizeof(Inode) * inodesPerBlock * inodeBlocks);
+
+    int space = sizeBlock;
+
+    for(int i = 0; i < totalInodes; i++){
+        if(space < sizeof(Inode)){
+            fseek(hd, space, SEEK_CUR);
+            space = sizeBlock;
+        }
+        fread(&inodes[i], sizeof(Inode), 1, hd);
+        space-=sizeof(Inode);
+    }
+
+    int numFreeInodes = totalInodes;
+
+    for(int i = 0; i < totalInodes; i++){
+        if(inodes[i].flag != 0)
+            numFreeInodes--;
+    }
+
+    printf(YELLOW "\n%-32s %-6s %-7s %-6s %-13s %-13s\n" RESET, "Nome do HD", "Blocos", "Tamanho", "Inodes", "Blocos-Livres", "Inodes-Livres");
+    printf("%-32s %-6d %-7d %-6d %-13d %-13d\n\n" RESET, nomeHD.c_str(), numBlocks, sizeBlock, totalInodes, superBlock.numFreeBlocks, numFreeInodes);
 }
 
 #endif
